@@ -243,6 +243,15 @@ function goToStep(step) {
     btnPlayMusic.innerText = '▶️ Escuchar';
   }
 
+  if (step < 4) {
+    const initialBlock = document.getElementById('paymentInitialState');
+    if (initialBlock) initialBlock.style.display = 'block';
+    const approvedBlock = document.getElementById('paymentApprovedState');
+    if (approvedBlock) approvedBlock.style.display = 'none';
+    const statusBox = document.getElementById('cardStatusBox');
+    if (statusBox) statusBox.style.display = 'none';
+  }
+
   currentStep = step;
 
   // Actualizar visibilidad de paneles
@@ -401,16 +410,17 @@ function startCardPolling(orderId) {
 }
 
 function handleCardApproved(order) {
-  document.getElementById('statusSpinner').style.display = 'none';
-  const statusBox = document.getElementById('cardStatusBox');
-  statusBox.classList.add('status-success');
-  document.getElementById('statusMsg').innerText = '🎉 ¡Pago acreditado! Tu tarjeta oficial está lista:';
-
   unlockedCardUrl = window.location.origin + order.accessUrl;
-  document.getElementById('btnOpenFinalCard').href = order.accessUrl;
-  document.getElementById('unlockedActions').style.display = 'flex';
 
-  showToast('¡Tarjeta activada con éxito!');
+  // Ocultar bloque inicial de pago (Mercado Pago, precio y simulación)
+  const initialBlock = document.getElementById('paymentInitialState');
+  if (initialBlock) initialBlock.style.display = 'none';
+
+  // Mostrar ÚNICAMENTE el botón de compartir por WhatsApp
+  const approvedBlock = document.getElementById('paymentApprovedState');
+  if (approvedBlock) approvedBlock.style.display = 'flex';
+
+  showToast('¡Pago aprobado! Ya puedes compartir por WhatsApp');
 }
 
 function handleShareWhatsApp() {
