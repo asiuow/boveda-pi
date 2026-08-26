@@ -379,9 +379,7 @@ function handleShareWhatsApp() {
 
 function handleShareFinalInvitation() {
   if (!unlockedCardUrl) return;
-  const config = eventModelConfig[cardState.eventType] || eventModelConfig['cumpleanos'];
-  const shareMsg = config.shareText || 'Te invito a mi cumple 🎉';
-  const text = encodeURIComponent(`${shareMsg}\n${unlockedCardUrl}`);
+  const text = encodeURIComponent(`Te invito a mi evento\n${unlockedCardUrl}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 

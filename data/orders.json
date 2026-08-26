@@ -176,5 +176,42 @@
       "userAgent": "node"
     },
     "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "19c4e4bb-4e36-4057-ab34-82fd2d0e1133",
+    "shortId": "19c4e4bb",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta de Bautismo - Joaquín",
+      "description": "Invitación interactiva para Joaquín (bautismo)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T21:30:59.072Z",
+    "updatedAt": "2026-08-26T21:30:59.967Z",
+    "preferenceId": "2210908-ab13c737-b4a9-4b16-90b4-ecd1b0061bae",
+    "paymentId": "SIMULATED-PAY-1787779859967",
+    "downloadToken": "eyJvcmRlcklkIjoiMTljNGU0YmItNGUzNi00MDU3LWFiMzQtODJmZDJkMGUxMTMzIiwidGltZXN0YW1wIjoxNzg3Nzc5ODU5OTY4LCJub25jZSI6ImMwZjU4YTM4ZmEzOWU1NGRjOTM3ZjM0OGU1M2YwZmRiIn0.DPED-HHMd67aOXV8phkuBE0SVlNzwezwOe6e6FMzGzU",
+    "cardData": {
+      "eventType": "bautismo",
+      "name": "Joaquín",
+      "age": "",
+      "photo": "",
+      "address": "Av. San Martín 1540",
+      "city": "Rosario",
+      "province": "Santa Fe",
+      "country": "Argentina",
+      "date": "Domingo 12 de Octubre",
+      "time": "11:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
   }
 ]
