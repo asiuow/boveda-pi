@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animación 3D - Cuadrado Rojo Giratorio | Producto Digital</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #050505;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    /* Fondo ambiental con viñeta */
+    .background-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(5, 5, 5, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Contenedor 3D */
+    .scene {
+      width: 220px;
+      height: 220px;
+      position: relative;
+      transform-style: preserve-3d;
+      z-index: 10;
+      cursor: grab;
+    }
+
+    .scene:active {
+      cursor: grabbing;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotateCube 8s infinite linear;
+    }
+
+    /* Caras del cubo */
+    .cube-face {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(185, 28, 28, 0.95));
+      border: 2px solid #ff4d4d;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(239, 68, 68, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.9);
+      user-select: none;
+      backdrop-filter: blur(5px);
+    }
+
+    .cube-face.front  { transform: rotateY(0deg) translateZ(110px); }
+    .cube-face.back   { transform: rotateY(180deg) translateZ(110px); }
+    .cube-face.right  { transform: rotateY(90deg) translateZ(110px); }
+    .cube-face.left   { transform: rotateY(-90deg) translateZ(110px); }
+    .cube-face.top    { transform: rotateX(90deg) translateZ(110px); }
+    .cube-face.bottom { transform: rotateX(-90deg) translateZ(110px); }
+
+    /* Animación continua de rotación */
+    @keyframes rotateCube {
+      0% {
+        transform: rotateX(15deg) rotateY(0deg) rotateZ(10deg);
+      }
+      50% {
+        transform: rotateX(195deg) rotateY(180deg) rotateZ(35deg);
+      }
+      100% {
+        transform: rotateX(375deg) rotateY(360deg) rotateZ(10deg);
+      }
+    }
+
+    /* Sombra proyectada */
+    .shadow-plane {
+      position: absolute;
+      bottom: -70px;
+      left: 50%;
+      transform: translateX(-50%) rotateX(90deg);
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(12px);
+      z-index: 5;
+    }
+
+    /* Panel de Control Flotante */
+    .controls {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      padding: 12px 20px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .controls button:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+      transform: translateY(-1px);
+    }
+
+    /* Insignia de producto comprado */
+    .badge {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    /* Marca de agua de seguridad */
+    .vault-stamp {
+      position: fixed;
+      bottom: 80px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 0.5px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="background-glow"></div>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    <span>Producto Digital Licenciado</span>
+  </div>
+
+  <div class="scene" id="scene">
+    <div class="cube" id="cube">
+      <div class="cube-face front">PI.JUGUETES</div>
+      <div class="cube-face back">VAULT</div>
+      <div class="cube-face right">3D ROTATION</div>
+      <div class="cube-face left">PREMIUM</div>
+      <div class="cube-face top">ARS $10</div>
+      <div class="cube-face bottom">VERIFIED</div>
+    </div>
+    <div class="shadow-plane"></div>
+  </div>
+
+  <div class="vault-stamp" id="vaultStamp">
+    Bóveda Digital Blindada • Token Verificado • Mercado Pago OK
+  </div>
+
+  <div class="controls">
+    <button id="btnPause" onclick="togglePause()">Pausar</button>
+    <button onclick="changeSpeed(0.5)">Lento</button>
+    <button onclick="changeSpeed(1)">Normal</button>
+    <button onclick="changeSpeed(2.5)">Rápido</button>
+    <button onclick="toggleWireframe()">Modo Neón</button>
+  </div>
+
+  <script>
+    const cube = document.getElementById('cube');
+    let isPaused = false;
+    let currentSpeed = 8;
+    let isWireframe = false;
+
+    function togglePause() {
+      isPaused = !isPaused;
+      cube.style.animationPlayState = isPaused ? 'paused' : 'running';
+      document.getElementById('btnPause').innerText = isPaused ? 'Reanudar' : 'Pausar';
+    }
+
+    function changeSpeed(multiplier) {
+      const newDuration = 8 / multiplier;
+      cube.style.animationDuration = newDuration + 's';
+    }
+
+    function toggleWireframe() {
+      isWireframe = !isWireframe;
+      const faces = document.querySelectorAll('.cube-face');
+      faces.forEach(f => {
+        if (isWireframe) {
+          f.style.background = 'rgba(239, 68, 68, 0.15)';
+          f.style.border = '2px solid #ef4444';
+          f.style.boxShadow = '0 0 25px #ef4444';
+        } else {
+          f.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(185, 28, 28, 0.95))';
+          f.style.border = '2px solid #ff4d4d';
+          f.style.boxShadow = 'inset 0 0 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(239, 68, 68, 0.4)';
+        }
+      });
+    }
+
+    // Interacción táctil y de ratón (Drag para rotar)
+    let isDragging = false;
+    let prevX = 0;
+    let prevY = 0;
+    let rotX = 15;
+    let rotY = 0;
+
+    const scene = document.getElementById('scene');
+
+    scene.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevX = e.clientX;
+      prevY = e.clientY;
+      cube.style.animation = 'none';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        cube.style.animation = `rotateCube ${currentSpeed}s infinite linear`;
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - prevX;
+      const deltaY = e.clientY - prevY;
+      rotY += deltaX * 0.8;
+      rotX -= deltaY * 0.8;
+      cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      prevX = e.clientX;
+      prevY = e.clientY;
+    });
+
+    // Touch events para móviles
+    scene.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      prevX = e.touches[0].clientX;
+      prevY = e.touches[0].clientY;
+      cube.style.animation = 'none';
+    });
+
+    window.addEventListener('touchend', () => {
+      if (isDragging) {
+        isDragging = false;
+        cube.style.animation = `rotateCube ${currentSpeed}s infinite linear`;
+      }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.touches[0].clientX - prevX;
+      const deltaY = e.touches[0].clientY - prevY;
+      rotY += deltaX * 0.8;
+      rotX -= deltaY * 0.8;
+      cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      prevX = e.touches[0].clientX;
+      prevY = e.touches[0].clientY;
+    });
+  </script>
+</body>
+</html>
