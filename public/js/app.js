@@ -82,6 +82,31 @@ function showToast(msg) {
 }
 
 /**
+ * Pop-up Divertido Personalizado (Fondo Blanco, Esquinas Redondeadas, Gris Claro Bold)
+ */
+function showFunModal({ emoji = '🎉', title = '¡Un momentito!', text = '' }) {
+  const emojiEl = document.getElementById('funModalEmoji');
+  const titleEl = document.getElementById('funModalTitle');
+  const textEl = document.getElementById('funModalText');
+  const overlayEl = document.getElementById('funModalOverlay');
+  if (emojiEl) emojiEl.innerText = emoji;
+  if (titleEl) titleEl.innerText = title;
+  if (textEl) textEl.innerText = text;
+  if (overlayEl) overlayEl.classList.add('show');
+}
+
+function closeFunModal() {
+  const overlayEl = document.getElementById('funModalOverlay');
+  if (overlayEl) overlayEl.classList.remove('show');
+}
+
+function handleFunModalOverlayClick(event) {
+  if (event.target.id === 'funModalOverlay') {
+    closeFunModal();
+  }
+}
+
+/**
  * Selección interactiva de carta en el Abanico de la Home
  */
 function selectFanCard(type, el) {
@@ -165,7 +190,11 @@ function goToStep(step) {
   if (step === 2 && currentStep === 1) {
     const name = document.getElementById('inputName').value.trim();
     if (!name) {
-      alert('Por favor, ingresa el nombre (máximo 20 letras).');
+      showFunModal({
+        emoji: '📝✨',
+        title: '¡Falta el nombre!',
+        text: 'Por favor, escribe el nombre del homenajeado o anfitrión para que todos sepan a quién celebramos.'
+      });
       return;
     }
     cardState.name = name.slice(0, 20);
@@ -182,7 +211,11 @@ function goToStep(step) {
     const time = document.getElementById('inputTime').value.trim();
 
     if (!address || !city || !province) {
-      alert('Por favor, completa Dirección, Ciudad y Provincia para que el mapa ubique con precisión el lugar.');
+      showFunModal({
+        emoji: '🗺️📍',
+        title: '¡Casi listos!',
+        text: 'Por favor, completa Dirección, Ciudad y Provincia para que el mapa ubique con total exactitud el lugar de tu fiesta.'
+      });
       return;
     }
 
@@ -311,7 +344,11 @@ async function handlePayCard() {
     const data = await res.json();
 
     if (!data.success) {
-      alert('Error: ' + (data.error || 'No se pudo generar el pago'));
+      showFunModal({
+        emoji: '💳⚡',
+        title: '¡Un momento!',
+        text: data.error || 'No se pudo generar el pago en este momento. Por favor intenta de nuevo.'
+      });
       btn.disabled = false;
       btn.innerText = '💳 Comprar tarjeta por 10 pesos';
       return;
@@ -335,7 +372,11 @@ async function handlePayCard() {
     btn.disabled = false;
     btn.innerText = 'Reabrir Mercado Pago';
   } catch (err) {
-    alert('Error de conexión con el servidor.');
+    showFunModal({
+      emoji: '📡⚠️',
+      title: 'Conexión interrumpida',
+      text: 'No pudimos comunicarnos con el servidor. Revisa tu conexión e inténtalo nuevamente.'
+    });
     btn.disabled = false;
     btn.innerText = '💳 Comprar tarjeta por 10 pesos';
   }
@@ -409,6 +450,10 @@ async function handleSimulateCardPayment() {
       throw new Error(simData.error || 'Error en la simulación');
     }
   } catch (err) {
-    alert('Error en simulación: ' + err.message);
+    showFunModal({
+      emoji: '⚡⚠️',
+      title: 'Aviso de prueba',
+      text: err.message || 'Ocurrió un detalle en la simulación.'
+    });
   }
 }
