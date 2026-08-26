@@ -11,15 +11,20 @@ function getBaseUrl(req) {
 
 export const paymentController = {
   /**
-   * Crea una orden y su preferencia de Mercado Pago
+   * Crea una orden de tarjeta de invitación y su preferencia de Mercado Pago
    */
   async createPreference(req, res) {
     try {
       const baseUrl = getBaseUrl(req);
-      const order = orderService.createOrder({
-        ip: req.ip,
-        userAgent: req.get('User-Agent')
-      });
+      const cardData = req.body?.cardData || {};
+
+      const order = orderService.createOrder(
+        {
+          ip: req.ip,
+          userAgent: req.get('User-Agent')
+        },
+        cardData
+      );
 
       const preferenceResult = await paymentService.createPreference(order, baseUrl);
 

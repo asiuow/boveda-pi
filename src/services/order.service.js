@@ -8,14 +8,18 @@ class OrderService {
   }
 
   /**
-   * Crea una nueva orden de compra pendiente
+   * Crea una nueva orden con los datos de la tarjeta de invitación
    */
-  createOrder(metadata = {}) {
+  createOrder(metadata = {}, cardData = {}) {
     const orderId = uuidv4();
     const order = {
       id: orderId,
-      status: 'pending', // 'pending' | 'approved' | 'rejected' | 'delivered'
-      item: { ...config.item },
+      status: 'pending',
+      item: {
+        ...config.item,
+        title: `Tarjeta Digital de Cumpleaños - ${cardData.name || 'Personalizada'}`,
+        description: `Invitación interactiva para ${cardData.name || 'el cumpleañero'} (${cardData.age || ''} años)`
+      },
       amount: config.item.unitPrice,
       currency: config.item.currencyId,
       createdAt: new Date().toISOString(),
@@ -23,6 +27,15 @@ class OrderService {
       preferenceId: null,
       paymentId: null,
       downloadToken: null,
+      cardData: {
+        name: (cardData.name || 'Cumpleañero').slice(0, 20),
+        age: cardData.age || '1',
+        photo: cardData.photo || '',
+        address: cardData.address || 'Av. Principal 123',
+        city: cardData.city || 'Buenos Aires',
+        date: cardData.date || 'Sábado',
+        time: cardData.time || '18:00 hs'
+      },
       metadata
     };
 
@@ -30,16 +43,10 @@ class OrderService {
     return order;
   }
 
-  /**
-   * Obtiene una orden por su ID
-   */
   getOrder(orderId) {
     return this.orders.get(orderId) || null;
   }
 
-  /**
-   * Asocia el preferenceId de Mercado Pago a la orden
-   */
   setPreferenceId(orderId, preferenceId) {
     const order = this.getOrder(orderId);
     if (order) {
@@ -49,9 +56,6 @@ class OrderService {
     return order;
   }
 
-  /**
-   * Marca la orden como aprobada y emite el token de descarga
-   */
   approveOrder(orderId, paymentDetails = {}) {
     const order = this.getOrder(orderId);
     if (!order) return null;
@@ -60,23 +64,9 @@ class OrderService {
     order.paymentId = paymentDetails.id || null;
     order.paymentMethod = paymentDetails.payment_type_id || 'mercadopago';
     order.updatedAt = new Date().toISOString();
-    
-    // Generar token seguro para descarga
     order.downloadToken = tokenService.generateDownloadToken(orderId);
 
-    console.log(`[OrderService] Orden ${orderId} APROBADA. Token de descarga generado.`);
-    return order;
-  }
-
-  /**
-   * Marca la orden como descargada
-   */
-  markAsDownloaded(orderId) {
-    const order = this.getOrder(orderId);
-    if (order) {
-      order.status = 'delivered';
-      order.updatedAt = new Date().toISOString();
-    }
+    console.log(`[OrderService] Orden ${orderId} APROBADA. Tarjeta digital generada.`);
     return order;
   }
 }

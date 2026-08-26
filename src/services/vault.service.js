@@ -8,18 +8,34 @@ const VAULT_FILE_PATH = path.join(__dirname, '../vault/product-app.html');
 
 export const vaultService = {
   /**
-   * Obtiene el contenido protegido del producto inyectando metadatos de compra
+   * Obtiene el contenido de la tarjeta de invitación inyectando los datos del homenajeado
    */
-  getProtectedProductContent(orderId, orderDetails = {}) {
+  getProtectedProductContent(orderId, order = {}) {
     if (!fs.existsSync(VAULT_FILE_PATH)) {
-      throw new Error('Archivo de producto no encontrado en la bóveda.');
+      throw new Error('Plantilla de tarjeta no encontrada en la bóveda.');
     }
 
     let content = fs.readFileSync(VAULT_FILE_PATH, 'utf8');
+    const card = order.cardData || {
+      name: 'Cumpleañero',
+      age: '1',
+      photo: '',
+      address: 'Av. Principal 123',
+      city: 'Buenos Aires',
+      date: 'Sábado',
+      time: '18:00 hs'
+    };
 
-    // Inyectar sello criptográfico único de la orden
-    const stamp = `Licencia: ORD-${orderId.slice(0, 8)} • Emitido: ${new Date().toLocaleDateString('es-AR')} • Titular: pi.juguetes`;
-    content = content.replace('Bóveda Digital Blindada • Token Verificado • Mercado Pago OK', stamp);
+    // Inyectar datos en el HTML
+    content = content
+      .replace(/{{NAME}}/g, card.name || 'Cumpleañero')
+      .replace(/{{AGE}}/g, card.age || '1')
+      .replace(/{{PHOTO}}/g, card.photo || '')
+      .replace(/{{ADDRESS}}/g, card.address || 'Av. Principal 123')
+      .replace(/{{CITY}}/g, card.city || 'Buenos Aires')
+      .replace(/{{DATE}}/g, card.date || 'Sábado')
+      .replace(/{{TIME}}/g, card.time || '18:00 hs')
+      .replace(/{{ORDER_ID}}/g, orderId ? orderId.slice(0, 8) : 'VERIFIED');
 
     return content;
   }
