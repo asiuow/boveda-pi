@@ -28,21 +28,33 @@ export const vaultService = {
 
     const eventLabels = {
       'cumpleanos': {
+        ogTitle: 'Te invito a mi cumple 🎉',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi cumple 🎉',
         badge: card.age ? `¡Cumple ${card.age} Años!` : '¡Feliz Cumpleaños!',
         headline: '¡Te invito a festejar mi cumpleaños juntos! 🎂🎈',
         themeColor: '#ef4444'
       },
       'bautismo': {
+        ogTitle: 'Te invito a mi bautismo 🕊️',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi bautismo 🕊️',
         badge: 'Mi Bautismo 🕊️',
         headline: 'Te invito a compartir este momento tan especial y bendecido ✨',
         themeColor: '#0ea5e9'
       },
       'asado': {
+        ogTitle: 'Te invito a un asado 🥩',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a un asado 🥩',
         badge: '¡Gran Asado! 🥩🔥',
         headline: '¡Se prende el fuego! Te invito a compartir un gran asado 🍷',
         themeColor: '#f97316'
       },
       'evento': {
+        ogTitle: 'Te invito a mi evento 🥂',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi evento 🥂',
         badge: 'Evento Especial 🌟',
         headline: '¡Estás cordialmente invitado a celebrar con nosotros! 🥂',
         themeColor: '#8b5cf6'
@@ -64,6 +76,9 @@ export const vaultService = {
       .replace(/{{DATE}}/g, card.date || 'Sábado')
       .replace(/{{TIME}}/g, card.time || '18:00 hs')
       .replace(/{{EVENT_TYPE}}/g, card.eventType || 'cumpleanos')
+      .replace(/{{OG_TITLE}}/g, currentEvent.ogTitle)
+      .replace(/{{OG_DESC}}/g, currentEvent.ogDesc)
+      .replace(/{{SHARE_SHORT_TEXT}}/g, currentEvent.shareText)
       .replace(/{{BADGE_TEXT}}/g, currentEvent.badge)
       .replace(/{{HEADLINE_TEXT}}/g, currentEvent.headline)
       .replace(/{{THEME_COLOR}}/g, currentEvent.themeColor)

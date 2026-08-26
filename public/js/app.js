@@ -29,6 +29,7 @@ const eventModelConfig = {
     showAge: true,
     badgeDefault: '¡Cumple {age} Años!',
     headline: '¡Te invito a celebrar mi cumpleaños juntos! 🎂🎈',
+    shareText: 'Te invito a mi cumple 🎉',
     color: '#ef4444'
   },
   'bautismo': {
@@ -40,6 +41,7 @@ const eventModelConfig = {
     showAge: false,
     badgeDefault: 'Mi Bautismo 🕊️',
     headline: 'Te invito a compartir este momento tan especial y bendecido ✨',
+    shareText: 'Te invito a mi bautismo 🕊️',
     color: '#0ea5e9'
   },
   'asado': {
@@ -51,6 +53,7 @@ const eventModelConfig = {
     showAge: false,
     badgeDefault: '¡Gran Asado! 🥩🔥',
     headline: '¡Se prende el fuego! Te invito a compartir un gran asado 🍷',
+    shareText: 'Te invito a un asado 🥩',
     color: '#f97316'
   },
   'evento': {
@@ -62,6 +65,7 @@ const eventModelConfig = {
     showAge: false,
     badgeDefault: 'Evento Especial 🌟',
     headline: '¡Estás cordialmente invitado a celebrar con nosotros! 🥂',
+    shareText: 'Te invito a mi evento 🥂',
     color: '#8b5cf6'
   }
 };
@@ -376,7 +380,8 @@ function handleShareWhatsApp() {
 function handleShareFinalInvitation() {
   if (!unlockedCardUrl) return;
   const config = eventModelConfig[cardState.eventType] || eventModelConfig['cumpleanos'];
-  const text = encodeURIComponent(`🎉 ¡Estás invitado a ${config.title.slice(3)} con ${cardState.name}!\n📅 Día: ${cardState.date} a las ${cardState.time}\n📍 Lugar: ${cardState.address}, ${cardState.city}, ${cardState.province}\n\n🌟 Toca el enlace para ver la tarjeta interactiva con música y mapa:\n${unlockedCardUrl}`);
+  const shareMsg = config.shareText || 'Te invito a mi cumple 🎉';
+  const text = encodeURIComponent(`${shareMsg}\n${unlockedCardUrl}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 

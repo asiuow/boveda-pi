@@ -7,8 +7,8 @@
 
   <!-- Metadatos OpenGraph para WhatsApp, Telegram, iMessage -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🎉 ¡Invitación especial de {{NAME}}!">
-  <meta property="og:description" content="{{HEADLINE_TEXT}} • 📅 {{DATE}} a las {{TIME}} • 📍 {{ADDRESS}}, {{CITY}}, {{PROVINCE}}. ¡Toca para abrir la tarjeta!">
+  <meta property="og:title" content="{{OG_TITLE}}">
+  <meta property="og:description" content="{{OG_DESC}}">
   <meta property="og:image" content="{{PHOTO}}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="{{THEME_COLOR}}">
@@ -380,7 +380,7 @@
     }
 
     function shareInvitation() {
-      const text = encodeURIComponent(`🎉 ¡Estás invitado a compartir este momento con {{NAME}}!\n📅 Día: {{DATE}} a las {{TIME}}\n📍 Lugar: {{ADDRESS}}, {{CITY}}, {{PROVINCE}}\n\n🌟 Toca el enlace para ver la tarjeta interactiva con música y mapa:\n${window.location.href}`);
+      const text = encodeURIComponent(`{{SHARE_SHORT_TEXT}}\n${window.location.href}`);
       window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     }
   </script>
