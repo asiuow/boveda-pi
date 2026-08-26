@@ -1,93 +1,67 @@
 let currentOrderId = null;
 let pollInterval = null;
+let unlockedUrl = null;
 
-// Elementos DOM
 const btnPay = document.getElementById('btnPay');
-const paymentStatusBox = document.getElementById('paymentStatusBox');
+const statusPanel = document.getElementById('statusPanel');
 const statusSpinner = document.getElementById('statusSpinner');
-const statusTitle = document.getElementById('statusTitle');
-const statusDesc = document.getElementById('statusDesc');
-const downloadActionGroup = document.getElementById('downloadActionGroup');
-const btnDownloadNow = document.getElementById('btnDownloadNow');
-const btnViewNow = document.getElementById('btnViewNow');
+const statusText = document.getElementById('statusText');
+const unlockedGroup = document.getElementById('unlockedGroup');
+const btnOpenWeb = document.getElementById('btnOpenWeb');
 const toast = document.getElementById('toast');
 
-/**
- * Muestra mensaje Toast
- */
-function showToast(message) {
-  toast.innerText = message;
+function showToast(msg) {
+  toast.innerText = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 /**
- * Inicia el proceso de pago con Mercado Pago
+ * Iniciar Pago con Mercado Pago
  */
 async function handleStartPayment() {
   btnPay.disabled = true;
-  btnPay.style.opacity = '0.7';
-  btnPay.innerHTML = 'Conectando con Mercado Pago...';
+  btnPay.innerText = 'Conectando con Mercado Pago...';
 
   try {
-    const response = await fetch('/api/create-preference', {
+    const res = await fetch('/api/create-preference', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
-
-    const data = await response.json();
+    const data = await res.json();
 
     if (!data.success) {
-      alert('Error iniciando el pago: ' + (data.error || 'Intente nuevamente'));
-      resetPayButton();
+      alert('Error: ' + (data.error || 'No se pudo conectar'));
+      btnPay.disabled = false;
+      btnPay.innerText = 'Pagar $10 con Mercado Pago';
       return;
     }
 
     currentOrderId = data.orderId;
-    localStorage.setItem('last_order_id', currentOrderId);
-
-    // Mostrar panel de estado en vivo
-    paymentStatusBox.style.display = 'block';
-    paymentStatusBox.className = 'payment-status-box';
+    statusPanel.style.display = 'block';
+    statusPanel.className = 'status-panel';
     statusSpinner.style.display = 'block';
-    statusTitle.innerText = 'Esperando confirmación del pago...';
-    statusDesc.innerText = 'Completa el pago en Mercado Pago. Al acreditarse, se descargará automáticamente.';
-    downloadActionGroup.style.display = 'none';
+    statusText.innerText = 'Esperando confirmación del pago en Mercado Pago...';
+    unlockedGroup.style.display = 'none';
 
-    // Iniciar escucha del estado en tiempo real
     startPolling(currentOrderId);
 
-    // Abrir pasarela de pago
     const checkoutUrl = data.initPoint || data.sandboxInitPoint;
     if (checkoutUrl) {
       window.open(checkoutUrl, '_blank');
     }
 
-    resetPayButton('Reabrir Pasarela de Mercado Pago');
-  } catch (error) {
-    console.error('Error:', error);
-    alert('No se pudo conectar con el servidor.');
-    resetPayButton();
+    btnPay.disabled = false;
+    btnPay.innerText = 'Reabrir Mercado Pago';
+  } catch (err) {
+    alert('Error al conectar con el servidor.');
+    btnPay.disabled = false;
+    btnPay.innerText = 'Pagar $10 con Mercado Pago';
   }
 }
 
 /**
- * Restaura el estado del botón de pago
- */
-function resetPayButton(text = 'Pagar $10 con Mercado Pago') {
-  btnPay.disabled = false;
-  btnPay.style.opacity = '1';
-  btnPay.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-      <line x1="1" y1="10" x2="23" y2="10"/>
-    </svg>
-    ${text}
-  `;
-}
-
-/**
- * Monitorea el estado de la orden cada 2.5 segundos
+ * Polling para escuchar el pago en tiempo real
  */
 function startPolling(orderId) {
   if (pollInterval) clearInterval(pollInterval);
@@ -101,107 +75,76 @@ function startPolling(orderId) {
         clearInterval(pollInterval);
         handlePaymentApproved(data.order);
       }
-    } catch (err) {
-      console.warn('Error consultando estado de orden:', err);
+    } catch (e) {
+      console.warn('Error en polling:', e);
     }
   }, 2500);
 }
 
 /**
- * Ejecuta el desbloqueo y la descarga automática al confirmarse el pago
+ * Desbloqueo del enlace web al confirmarse el pago (Sin Descargas)
  */
 function handlePaymentApproved(order) {
   statusSpinner.style.display = 'none';
-  paymentStatusBox.classList.add('status-success');
-  statusTitle.innerText = '✅ ¡Pago Acreditado con Éxito!';
-  statusDesc.innerText = 'Token de la bóveda generado. Iniciando descarga automática...';
+  statusPanel.classList.add('status-success');
+  statusText.innerText = '✅ ¡Pago aprobado! Enlace web generado:';
 
-  // Configurar botones de descarga y visualización
-  btnDownloadNow.href = order.downloadUrl;
-  btnViewNow.href = order.viewUrl;
-  downloadActionGroup.style.display = 'flex';
+  unlockedUrl = window.location.origin + order.accessUrl;
+  btnOpenWeb.href = order.accessUrl;
+  unlockedGroup.style.display = 'flex';
 
-  // Disparar descarga automática en el navegador
-  const autoDownloadLink = document.createElement('a');
-  autoDownloadLink.href = order.downloadUrl;
-  autoDownloadLink.setAttribute('download', 'animacion-cuadrado-rojo.html');
-  document.body.appendChild(autoDownloadLink);
-  autoDownloadLink.click();
-  document.body.removeChild(autoDownloadLink);
-
-  showToast('¡Descarga iniciada exitosamente!');
+  showToast('¡Acceso web desbloqueado!');
 }
 
 /**
- * Compartir enlace de la aplicación (Móvil y Escritorio)
+ * Compartir en WhatsApp
  */
-async function handleShareLink() {
-  const shareData = {
-    title: 'Animación 3D Cuadrado Rojo - pi.juguetes',
-    text: 'Mira este producto digital interactivo. Pago seguro con Mercado Pago por $10 ARS.',
-    url: window.location.origin
-  };
-
-  if (navigator.share) {
-    try {
-      await navigator.share(shareData);
-    } catch (err) {
-      // Usuario canceló compartir o fallback
-      copyToClipboard(window.location.origin);
-    }
-  } else {
-    copyToClipboard(window.location.origin);
-  }
+function handleShareWhatsApp() {
+  const shareText = encodeURIComponent('Animación 2D Cuadrado Giratorio - pi.juguetes $10 ARS: ' + window.location.origin);
+  window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
 }
 
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('¡Enlace copiado al portapapeles!');
+/**
+ * Copiar enlace al portapapeles
+ */
+function handleCopyLink() {
+  const url = window.location.origin;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Enlace copiado al portapapeles');
   }).catch(() => {
-    showToast('Enlace: ' + text);
+    showToast('URL: ' + url);
   });
 }
 
 /**
- * Simula el flujo completo de pago en 1 segundo (Modo Demo)
+ * Compartir el enlace web generado en WhatsApp
  */
-async function handleSimulateInstantPayment() {
-  try {
-    paymentStatusBox.style.display = 'block';
-    statusSpinner.style.display = 'block';
-    statusTitle.innerText = 'Simulando pago de $10...';
-    statusDesc.innerText = 'Creando orden y validando webhook...';
+function handleShareUnlockedLink() {
+  if (!unlockedUrl) return;
+  const shareText = encodeURIComponent('Aquí tienes el enlace web del Cuadrado 2D: ' + unlockedUrl);
+  window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
+}
 
-    // 1. Crear orden
+/**
+ * Simular Pago Aprobado (Modo Prueba Instantáneo)
+ */
+async function handleSimulateApproved() {
+  try {
+    statusPanel.style.display = 'block';
+    statusSpinner.style.display = 'block';
+    statusText.innerText = 'Simulando pago...';
+    unlockedGroup.style.display = 'none';
+
     const resPref = await fetch('/api/create-preference', { method: 'POST' });
     const prefData = await resPref.json();
-    const orderId = prefData.orderId;
 
-    // 2. Simular aprobación
-    const resSim = await fetch(`/api/simulate-payment/${orderId}`, { method: 'POST' });
+    const resSim = await fetch(`/api/simulate-payment/${prefData.orderId}`, { method: 'POST' });
     const simData = await resSim.json();
 
     if (simData.success) {
-      handlePaymentApproved({
-        downloadUrl: simData.order.downloadUrl,
-        viewUrl: simData.order.viewUrl
-      });
+      handlePaymentApproved({ accessUrl: simData.order.accessUrl });
     }
-  } catch (error) {
-    alert('Error en simulación: ' + error.message);
+  } catch (err) {
+    alert('Error en simulación: ' + err.message);
   }
 }
-
-// Auto-detección si el usuario vuelve de Mercado Pago con ?order_id=...
-window.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderId = urlParams.get('order_id') || urlParams.get('simulated_order') || localStorage.getItem('last_order_id');
-
-  if (orderId) {
-    currentOrderId = orderId;
-    paymentStatusBox.style.display = 'block';
-    statusSpinner.style.display = 'block';
-    statusTitle.innerText = 'Verificando estado de tu pago...';
-    startPolling(orderId);
-  }
-});

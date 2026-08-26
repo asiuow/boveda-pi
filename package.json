@@ -1,11 +1,12 @@
 {
   "name": "mercadopago-digital-vault",
   "version": "1.0.0",
-  "description": "App modular con pasarela Mercado Pago y bóveda digital blindada",
+  "description": "App modular con pasarela Mercado Pago y cuadrado 2D flat",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "test": "node test/verify-flow.js",
     "build": "npm install"
   },
   "engines": {

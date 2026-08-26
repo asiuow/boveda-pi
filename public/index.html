@@ -3,112 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Acceso Digital | pi.juguetes</title>
-  <meta name="description" content="Animación digital 3D protegida. Pago seguro con Mercado Pago y descarga inmediata.">
+  <title>Cuadrado 2D | pi.juguetes</title>
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ef4444'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ff0000'/></svg>">
 </head>
 <body>
-
-  <div class="ambient-light"></div>
 
   <main class="container">
     <div class="card">
       
-      <div class="header-badge">
-        <span class="badge-dot"></span>
-        <span>Bóveda Digital Blindada</span>
+      <!-- Cuadrado 2D Flat Girando -->
+      <div class="preview-container">
+        <div class="square-2d-preview"></div>
       </div>
 
-      <!-- Cuadrado Rojo Representativo -->
-      <div class="preview-box">
-        <div class="preview-square">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
-        </div>
+      <h1>Cuadrado 2D Giratorio</h1>
+      <p class="subtitle">pi.juguetes</p>
+
+      <div class="price-tag">
+        <span>Precio oficial</span>
+        <strong>$10 ARS</strong>
       </div>
 
-      <h1>Animación 3D Cuadrado Rojo</h1>
-      <p class="description">
-        Producto digital exclusivo: Web interactiva con animación 3D de cubo rojo girando sobre fondo negro.
-      </p>
-
-      <div class="price-container">
-        <div class="price-label">
-          <span>Precio Oficial</span>
-          <strong>pi.juguetes</strong>
-        </div>
-        <div>
-          <span class="price-amount">$10</span>
-          <span class="price-currency">ARS</span>
-        </div>
-      </div>
-
-      <!-- Acciones Principales -->
-      <div class="actions" id="actionButtons">
-        <button id="btnPay" class="btn btn-primary" onclick="handleStartPayment()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-            <line x1="1" y1="10" x2="23" y2="10"/>
-          </svg>
+      <!-- Botones de Acción -->
+      <div class="btn-group">
+        <button id="btnPay" class="btn btn-pay" onclick="handleStartPayment()">
           Pagar $10 con Mercado Pago
         </button>
 
-        <button id="btnShare" class="btn btn-secondary" onclick="handleShareLink()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="18" cy="5" r="3"/>
-            <circle cx="6" cy="12" r="3"/>
-            <circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          Compartir Link
+        <button id="btnWhatsapp" class="btn btn-whatsapp" onclick="handleShareWhatsApp()">
+          Compartir en WhatsApp
+        </button>
+
+        <button id="btnCopy" class="btn btn-copy" onclick="handleCopyLink()">
+          Copiar enlace
         </button>
       </div>
 
-      <!-- Panel de Estado en Vivo (Detectando Pago) -->
-      <div id="paymentStatusBox" class="payment-status-box">
+      <!-- Panel de Estado / Enlace Web Desbloqueado (Sin Descarga) -->
+      <div id="statusPanel" class="status-panel">
         <div id="statusSpinner" class="status-spinner"></div>
-        <div id="statusTitle" class="status-title">Esperando confirmación del pago...</div>
-        <div id="statusDesc" class="status-desc">Mercado Pago está procesando tu transacción en tiempo real.</div>
+        <div id="statusText" class="status-text">Esperando confirmación del pago...</div>
 
-        <!-- Botones de descarga que aparecen al aprobarse -->
-        <div id="downloadActionGroup" style="display: none; margin-top: 16px; flex-direction: column; gap: 10px;">
-          <a id="btnDownloadNow" href="#" class="btn btn-primary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Descargar Archivo Ahora (.html)
+        <!-- Grupo de Enlace Generado -->
+        <div id="unlockedGroup" style="display: none; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <a id="btnOpenWeb" href="#" target="_blank" class="btn btn-pay">
+            Abrir Animación Web
           </a>
-          <a id="btnViewNow" href="#" target="_blank" class="btn btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-              <polyline points="15 3 21 3 21 9"/>
-              <line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
-            Abrir y Ver en Pantalla Completa
-          </a>
+          <button id="btnShareUnlocked" class="btn btn-whatsapp" onclick="handleShareUnlockedLink()">
+            Compartir enlace web en WhatsApp
+          </button>
         </div>
       </div>
 
-      <!-- Herramienta de Simulación Rápida (Para Desarrollo) -->
-      <div class="dev-simulator">
-        <button class="dev-simulator-btn" onclick="handleSimulateInstantPayment()">
-          ⚡ Modo Prueba: Simular pago de $10 y descargar al instante
+      <!-- Botón de Simulación de Pago Aprobado -->
+      <div>
+        <button class="btn-sim" onclick="handleSimulateApproved()">
+          ⚡ Simular pago aprobado
         </button>
       </div>
 
     </div>
-
-    <footer>
-      🔒 Transacción cifrada • Bóveda Blindada • Pagos con Mercado Pago
-    </footer>
   </main>
 
-  <div id="toast" class="toast">¡Enlace copiado al portapapeles!</div>
+  <div id="toast" class="toast">Enlace copiado</div>
 
   <script src="/js/app.js"></script>
 </body>

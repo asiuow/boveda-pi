@@ -32,8 +32,7 @@ export const paymentController = {
         preferenceId: preferenceResult.preferenceId,
         initPoint: preferenceResult.initPoint,
         sandboxInitPoint: preferenceResult.sandboxInitPoint,
-        isMock: preferenceResult.isMock,
-        message: preferenceResult.message
+        isMock: preferenceResult.isMock
       });
     } catch (error) {
       console.error('[PaymentController] Error creando preferencia:', error);
@@ -70,11 +69,8 @@ export const paymentController = {
           amount: order.amount,
           currency: order.currency,
           createdAt: order.createdAt,
-          updatedAt: order.updatedAt,
           isApproved,
-          downloadToken: isApproved ? order.downloadToken : null,
-          downloadUrl: isApproved ? `/download/${order.downloadToken}` : null,
-          viewUrl: isApproved ? `/view/${order.downloadToken}` : null
+          accessUrl: isApproved ? `/p/${order.downloadToken}` : null
         }
       });
     } catch (error) {
@@ -90,12 +86,10 @@ export const paymentController = {
    */
   async handleWebhook(req, res) {
     try {
-      // Responder 200/204 de inmediato a Mercado Pago para evitar reintentos innecesarios
       const result = await paymentService.handleWebhook(req.body, req.query);
       return res.status(200).json({ success: true, result });
     } catch (error) {
       console.error('[PaymentController] Error procesando webhook:', error.message);
-      // Siempre responder 200 en webhooks para cumplir estándar de MP
       return res.status(200).json({ success: false, error: error.message });
     }
   },
@@ -121,9 +115,7 @@ export const paymentController = {
         order: {
           id: order.id,
           status: order.status,
-          downloadToken: order.downloadToken,
-          downloadUrl: `/download/${order.downloadToken}`,
-          viewUrl: `/view/${order.downloadToken}`
+          accessUrl: `/p/${order.downloadToken}`
         }
       });
     } catch (error) {
