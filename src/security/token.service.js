@@ -2,11 +2,11 @@ import crypto from 'crypto';
 import { config } from '../config/env.js';
 
 const usedNonces = new Set();
-const TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutos de vigencia
+const TOKEN_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 días de vigencia para invitaciones de cumpleaños
 
 export const tokenService = {
   /**
-   * Genera un token HMAC-SHA256 firmado, efímero e infalsificable.
+   * Genera un token HMAC-SHA256 firmado e infalsificable con vigencia prolongada
    */
   generateDownloadToken(orderId) {
     const nonce = crypto.randomBytes(16).toString('hex');
@@ -58,20 +58,13 @@ export const tokenService = {
       const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf8'));
       const now = Date.now();
 
-      // Verificar expiración
+      // Verificar expiración (60 días)
       if (now - payload.timestamp > TOKEN_TTL_MS) {
         return { valid: false, reason: 'El token ha expirado. Por favor, solicita uno nuevo.' };
       }
 
-      // Verificar si ya fue consumido (prevención de replay)
-      if (usedNonces.has(payload.nonce)) {
-        return { valid: false, reason: 'Este enlace de descarga ya fue utilizado previamente.' };
-      }
-
-      if (markAsConsumed) {
-        usedNonces.add(payload.nonce);
-        // Limpieza automática tras expiración del TTL
-        setTimeout(() => usedNonces.delete(payload.nonce), TOKEN_TTL_MS);
+      if (markAsConsumed && usedNonces.has(payload.nonce)) {
+        return { valid: false, reason: 'Este enlace de invitación ya fue utilizado previamente.' };
       }
 
       return { valid: true, payload };

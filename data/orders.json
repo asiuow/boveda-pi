@@ -1,0 +1,35 @@
+[
+  {
+    "id": "c33e944d-2ed2-49c8-bac0-ef44fee90416",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta Digital de Cumpleaños - Mateo",
+      "description": "Invitación interactiva para Mateo (5 años)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T13:52:26.031Z",
+    "updatedAt": "2026-08-26T13:52:26.855Z",
+    "preferenceId": "2210908-e348d86c-8395-4878-b9c8-f2148f43b733",
+    "paymentId": "SIMULATED-PAY-1787752346855",
+    "downloadToken": "eyJvcmRlcklkIjoiYzMzZTk0NGQtMmVkMi00OWM4LWJhYzAtZWY0NGZlZTkwNDE2IiwidGltZXN0YW1wIjoxNzg3NzUyMzQ2ODU1LCJub25jZSI6ImZiYTA0MWU0M2MyM2MxNWQwMDdjMDgxNTYzODZiZmM0In0.n0ojWxNbP5sYNpWHSb2eZFXZsZCL3eGAqHmANkfcDeA",
+    "cardData": {
+      "name": "Mateo",
+      "age": "5",
+      "photo": "",
+      "address": "Av. Corrientes 1234",
+      "city": "Buenos Aires",
+      "date": "Sábado 15 de Noviembre",
+      "time": "17:30 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
+  }
+]

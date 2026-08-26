@@ -36,7 +36,7 @@ function updateCharCount() {
 }
 
 /**
- * Cargar y previsualizar foto en Base64
+ * Cargar, comprimir y optimizar foto para móviles (Canvas resize max 800x800)
  */
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
@@ -44,12 +44,38 @@ function handlePhotoUpload(event) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    cardState.photo = e.target.result;
-    document.getElementById('imgPreview').src = cardState.photo;
-    document.getElementById('imgPreview').style.display = 'block';
-    document.getElementById('photoIcon').style.display = 'none';
-    document.getElementById('uploaderText').innerText = 'Foto seleccionada ✅';
-    document.getElementById('sumPhotoStatus').innerText = 'Cargada ✅';
+    const img = new Image();
+    img.onload = function() {
+      // Redimensionar para optimizar peso en móviles
+      const maxDim = 800;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height && width > maxDim) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else if (height > maxDim) {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Comprimir a JPEG calidad 0.8
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      cardState.photo = compressedDataUrl;
+
+      document.getElementById('imgPreview').src = cardState.photo;
+      document.getElementById('imgPreview').style.display = 'block';
+      document.getElementById('photoIcon').style.display = 'none';
+      document.getElementById('uploaderText').innerText = 'Foto lista ✅';
+      document.getElementById('sumPhotoStatus').innerText = 'Cargada y Optimizada ✅';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -259,10 +285,10 @@ function handleCardApproved(order) {
 }
 
 /**
- * Compartir en WhatsApp
+ * Compartir en WhatsApp la web de creación
  */
 function handleShareWhatsApp() {
-  const text = encodeURIComponent(`¡Mira la tarjeta de cumpleaños de ${cardState.name || 'mi fiesta'}! 🎉\n${window.location.origin}`);
+  const text = encodeURIComponent(`¡Crea tu tarjeta digital interactiva con música y mapa en pi.juguetes! 🎉\n${window.location.origin}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
@@ -293,11 +319,17 @@ async function handleSimulateCardPayment() {
     });
     const prefData = await resPref.json();
 
+    if (!prefData.success || !prefData.orderId) {
+      throw new Error(prefData.error || 'Error al inicializar la orden');
+    }
+
     const resSim = await fetch(`/api/simulate-payment/${prefData.orderId}`, { method: 'POST' });
     const simData = await resSim.json();
 
     if (simData.success) {
       handleCardApproved({ accessUrl: simData.order.accessUrl });
+    } else {
+      throw new Error(simData.error || 'Error en la simulación');
     }
   } catch (err) {
     alert('Error en simulación: ' + err.message);
