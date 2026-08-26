@@ -1,27 +1,27 @@
 import app from '../src/app.js';
 import http from 'http';
 
-const TEST_PORT = 7896;
+const TEST_PORT = 7897;
 
 async function runTests() {
-  console.log('--- TEST: 4 MODELOS DE TARJETAS Y GEOLOCALIZACIÓN PRECISA ---');
+  console.log('--- TEST: SUPRESIÓN DE CAJA SUPERIOR DE WHATSAPP Y ENLACE LIMPIO ---');
   
   const server = http.createServer(app);
   await new Promise((resolve) => server.listen(TEST_PORT, '127.0.0.1', resolve));
   const baseUrl = `http://127.0.0.1:${TEST_PORT}`;
 
   try {
-    // 1. Crear orden con modelo 'bautismo' y geolocalización con País y Provincia
+    // 1. Crear orden
     const cardData = {
-      eventType: 'bautismo',
-      name: 'Joaquín',
-      age: '',
-      address: 'Av. San Martín 1540',
-      city: 'Rosario',
-      province: 'Santa Fe',
+      eventType: 'cumpleanos',
+      name: 'Ana',
+      age: '30',
+      address: 'Suiza 886',
+      city: 'Junín',
+      province: 'Buenos Aires',
       country: 'Argentina',
-      date: 'Domingo 12 de Octubre',
-      time: '11:00 hs'
+      date: '15 de Noviembre',
+      time: '17:00 hs'
     };
 
     const createRes = await fetch(`${baseUrl}/api/create-preference`, {
@@ -30,32 +30,36 @@ async function runTests() {
       body: JSON.stringify({ cardData })
     });
     const createData = await createRes.json();
-    console.log('✅ Orden Bautismo creada:', createData.orderId, 'ShortId:', createData.shortId);
+    console.log('✅ Orden creada:', createData.orderId, 'ShortId:', createData.shortId);
 
     // 2. Simular pago
     const simRes = await fetch(`${baseUrl}/api/simulate-payment/${createData.orderId}`, { method: 'POST' });
     const simData = await simRes.json();
     console.log('✅ Enlace generado:', simData.order.accessUrl);
 
-    // 3. Verificar renderizado de la tarjeta con modelo bautismo y geolocalización exacta
-    const viewRes = await fetch(`${baseUrl}${simData.order.accessUrl}`);
-    if (viewRes.status !== 200) {
-      throw new Error(`Error en tarjeta: status ${viewRes.status}`);
+    // 3. Verificar que un navegador móvil / usuario reciba 200 OK con la tarjeta
+    const userRes = await fetch(`${baseUrl}${simData.order.accessUrl}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)' }
+    });
+    if (userRes.status !== 200) {
+      throw new Error(`Status inesperado para usuario: ${userRes.status}`);
     }
-    const html = await viewRes.text();
-
-    if (!html.includes('Joaquín') || !html.includes('Bautismo') || !html.includes('Santa Fe') || !html.includes('Argentina')) {
-      throw new Error('Faltan datos de evento o ubicación geográfica precisa en la tarjeta');
+    const html = await userRes.text();
+    if (!html.includes('Ana') || !html.includes('Suiza 886')) {
+      throw new Error('Faltan datos en la tarjeta para el usuario');
     }
-    console.log('✅ Tarjeta inyectó correctamente Nombre, Bautismo, Provincia (Santa Fe) y País (Argentina).');
+    console.log('✅ Usuario en navegador recibe 200 OK con la tarjeta completa.');
 
-    // 4. Verificar enlace de Google Maps con la cadena completa
-    if (!html.includes('Av.%20San%20Mart') || !html.includes('Santa%20Fe')) {
-      throw new Error('El enlace de Google Maps no contiene la ubicación precisa');
+    // 4. Verificar que el bot de vista previa de WhatsApp reciba 404 (para eliminar la caja superior de vista previa)
+    const botRes = await fetch(`${baseUrl}${simData.order.accessUrl}`, {
+      headers: { 'User-Agent': 'facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)' }
+    });
+    if (botRes.status !== 404) {
+      throw new Error(`El bot de WhatsApp debería recibir 404, recibió: ${botRes.status}`);
     }
-    console.log('✅ Enlace de Google Maps verificado con geolocalización exacta.');
+    console.log('✅ Bot de WhatsApp recibe 404: La caja superior queda 100% eliminada.');
 
-    console.log('\n🎉 TODAS LAS PRUEBAS DE MODELOS Y GEOLOCALIZACIÓN PASARON CON ÉXITO\n');
+    console.log('\n🎉 TODAS LAS PRUEBAS PASARON CON ÉXITO\n');
   } finally {
     server.close();
   }

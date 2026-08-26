@@ -213,5 +213,42 @@
       "userAgent": "node"
     },
     "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "5912b52c-ecd6-45ff-b862-bc9659b35ed4",
+    "shortId": "5912b52c",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta de Cumpleaños - Ana",
+      "description": "Invitación interactiva para Ana (cumpleanos)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T22:21:22.268Z",
+    "updatedAt": "2026-08-26T22:21:23.132Z",
+    "preferenceId": "2210908-370b35cd-b9e5-47e7-b76c-aa9f8d893549",
+    "paymentId": "SIMULATED-PAY-1787782883132",
+    "downloadToken": "eyJvcmRlcklkIjoiNTkxMmI1MmMtZWNkNi00NWZmLWI4NjItYmM5NjU5YjM1ZWQ0IiwidGltZXN0YW1wIjoxNzg3NzgyODgzMTMyLCJub25jZSI6IjQwNDJkYzJjOWY0YzlkZGZkNDFlMWZjNGE4ZDVhZDNmIn0.uCu9U0_3yUFQuSFX-R_Zw9kAbEMCwjs-j6rSvWK2qgM",
+    "cardData": {
+      "eventType": "cumpleanos",
+      "name": "Ana",
+      "age": "30",
+      "photo": "",
+      "address": "Suiza 886",
+      "city": "Junín",
+      "province": "Buenos Aires",
+      "country": "Argentina",
+      "date": "15 de Noviembre",
+      "time": "17:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
   }
 ]

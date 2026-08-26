@@ -7,6 +7,13 @@ export const downloadController = {
    * Visualización universal de la tarjeta (Compatible con Android, iOS/Safari, Windows, Mac, Linux)
    */
   async viewProduct(req, res) {
+    // Si la petición es del crawler de WhatsApp/Facebook para armar la vista previa,
+    // responder 404 para eliminar la caja superior de vista previa y dejar solo el texto del chat
+    const ua = (req.get('User-Agent') || '').toLowerCase();
+    if (ua.includes('facebookexternalhit') || ua.includes('whatsapp') || ua.includes('facebot')) {
+      return res.status(404).end();
+    }
+
     const idParam = req.params.id || req.params.token;
     
     if (!idParam) {
