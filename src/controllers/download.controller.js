@@ -4,16 +4,9 @@ import { tokenService } from '../security/token.service.js';
 
 export const downloadController = {
   /**
-   * Visualización universal de la tarjeta (Compatible con Android, iOS/Safari, Windows, Mac, Linux)
+   * Visualización universal de la tarjeta (Compatible con WhatsApp preview, iOS, Android, Mac, Windows, Linux)
    */
   async viewProduct(req, res) {
-    // Si la petición es del crawler de WhatsApp/Facebook para armar la vista previa,
-    // responder 404 para eliminar la caja superior de vista previa y dejar solo el texto del chat
-    const ua = (req.get('User-Agent') || '').toLowerCase();
-    if (ua.includes('facebookexternalhit') || ua.includes('whatsapp') || ua.includes('facebot')) {
-      return res.status(404).end();
-    }
-
     const idParam = req.params.id || req.params.token;
     
     if (!idParam) {
@@ -24,7 +17,6 @@ export const downloadController = {
     const order = orderService.getOrder(idParam);
 
     if (!order) {
-      // Si no coincide directo, intentar verificación criptográfica
       const verification = tokenService.verifyToken(idParam, false);
       if (!verification.valid) {
         return res.status(404).send(`
@@ -32,14 +24,11 @@ export const downloadController = {
           <html lang="es">
           <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Invitación no encontrada</title>
+            <title>Te invito a mi fiesta</title>
             <style>
-              body { background: #0b0b0f; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; padding: 20px; }
-              .card { background: #161620; padding: 32px 24px; border-radius: 20px; border: 1px solid #282836; max-width: 380px; }
-              h1 { font-size: 20px; margin-bottom: 10px; color: #ef4444; }
-              p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-              a { display: inline-block; background: #ef4444; color: #fff; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; }
+              body { background: #0b0b0f; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+              .card { background: #161620; padding: 30px; border-radius: 16px; border: 1px solid #333; }
+              a { color: #ef4444; text-decoration: none; font-weight: bold; }
             </style>
           </head>
           <body>
@@ -60,7 +49,7 @@ export const downloadController = {
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Cache-Control', 'public, max-age=300'); // Cache liviano para móviles
+      res.setHeader('Cache-Control', 'public, max-age=300');
       return res.send(productContent);
     } catch (error) {
       console.error('[DownloadController] Error sirviendo tarjeta:', error);

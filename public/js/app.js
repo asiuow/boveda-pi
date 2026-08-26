@@ -373,14 +373,12 @@ function handleCardApproved(order) {
 }
 
 function handleShareWhatsApp() {
-  const text = encodeURIComponent(`¡Crea tu tarjeta digital interactiva en pi.juguetes! 🎉\n${window.location.origin}`);
-  window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(window.location.origin)}`, '_blank');
 }
 
 function handleShareFinalInvitation() {
   if (!unlockedCardUrl) return;
-  const text = encodeURIComponent(`Te invito a mi evento\n${unlockedCardUrl}`);
-  window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(unlockedCardUrl)}`, '_blank');
 }
 
 async function handleSimulateCardPayment() {

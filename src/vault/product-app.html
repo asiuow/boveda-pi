@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>{{NAME}}</title>
+  <title>Te invito a mi fiesta</title>
+  <meta property="og:title" content="Te invito a mi fiesta">
+  <meta property="og:type" content="website">
   <meta name="theme-color" content="{{THEME_COLOR}}">
 
   <style>
@@ -373,7 +375,7 @@
     }
 
     function shareInvitation() {
-      const text = encodeURIComponent(`Te invito a mi evento\n${window.location.href}`);
+      const text = encodeURIComponent(window.location.href);
       window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     }
   </script>

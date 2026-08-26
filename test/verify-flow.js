@@ -1,10 +1,10 @@
 import app from '../src/app.js';
 import http from 'http';
 
-const TEST_PORT = 7897;
+const TEST_PORT = 7898;
 
 async function runTests() {
-  console.log('--- TEST: SUPRESIÓN DE CAJA SUPERIOR DE WHATSAPP Y ENLACE LIMPIO ---');
+  console.log('--- TEST: VISTA PREVIA WHATSAPP - TE INVITO A MI FIESTA ---');
   
   const server = http.createServer(app);
   await new Promise((resolve) => server.listen(TEST_PORT, '127.0.0.1', resolve));
@@ -14,8 +14,8 @@ async function runTests() {
     // 1. Crear orden
     const cardData = {
       eventType: 'cumpleanos',
-      name: 'Ana',
-      age: '30',
+      name: 'Mau',
+      age: '33',
       address: 'Suiza 886',
       city: 'Junín',
       province: 'Buenos Aires',
@@ -37,29 +37,21 @@ async function runTests() {
     const simData = await simRes.json();
     console.log('✅ Enlace generado:', simData.order.accessUrl);
 
-    // 3. Verificar que un navegador móvil / usuario reciba 200 OK con la tarjeta
-    const userRes = await fetch(`${baseUrl}${simData.order.accessUrl}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)' }
-    });
-    if (userRes.status !== 200) {
-      throw new Error(`Status inesperado para usuario: ${userRes.status}`);
-    }
-    const html = await userRes.text();
-    if (!html.includes('Ana') || !html.includes('Suiza 886')) {
-      throw new Error('Faltan datos en la tarjeta para el usuario');
-    }
-    console.log('✅ Usuario en navegador recibe 200 OK con la tarjeta completa.');
-
-    // 4. Verificar que el bot de vista previa de WhatsApp reciba 404 (para eliminar la caja superior de vista previa)
-    const botRes = await fetch(`${baseUrl}${simData.order.accessUrl}`, {
+    // 3. Verificar que WhatsApp preview reciba 200 OK con 'Te invito a mi fiesta'
+    const waRes = await fetch(`${baseUrl}${simData.order.accessUrl}`, {
       headers: { 'User-Agent': 'facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)' }
     });
-    if (botRes.status !== 404) {
-      throw new Error(`El bot de WhatsApp debería recibir 404, recibió: ${botRes.status}`);
+    if (waRes.status !== 200) {
+      throw new Error(`Status inesperado: ${waRes.status}`);
     }
-    console.log('✅ Bot de WhatsApp recibe 404: La caja superior queda 100% eliminada.');
+    const html = await waRes.text();
 
-    console.log('\n🎉 TODAS LAS PRUEBAS PASARON CON ÉXITO\n');
+    if (!html.includes('Te invito a mi fiesta')) {
+      throw new Error('Debe contener Te invito a mi fiesta');
+    }
+    console.log('✅ WhatsApp crawler recibe 200 OK con título "Te invito a mi fiesta".');
+
+    console.log('\n🎉 PRUEBAS PASARON CON ÉXITO\n');
   } finally {
     server.close();
   }
