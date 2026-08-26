@@ -1,53 +1,63 @@
-import { tokenService } from '../security/token.service.js';
-import { vaultService } from '../services/vault.service.js';
 import { orderService } from '../services/order.service.js';
+import { vaultService } from '../services/vault.service.js';
+import { tokenService } from '../security/token.service.js';
 
 export const downloadController = {
   /**
-   * Visualización directa y segura del enlace web generado (Sin descarga de archivos)
+   * Visualización universal de la tarjeta (Compatible con Android, iOS/Safari, Windows, Mac, Linux)
    */
   async viewProduct(req, res) {
-    const { token } = req.params;
-    const verification = tokenService.verifyToken(token, false);
+    const idParam = req.params.id || req.params.token;
+    
+    if (!idParam) {
+      return res.status(404).send('Identificador no provisto.');
+    }
 
-    if (!verification.valid) {
-      return res.status(403).send(`
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Acceso Inválido</title>
-          <style>
-            body { background: #000; color: #ff3333; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-            .box { padding: 30px; border: 1px solid #222; max-width: 400px; }
-            h1 { font-size: 18px; margin-bottom: 10px; }
-            p { color: #888; font-size: 13px; margin-bottom: 20px; }
-            a { color: #ff3333; text-decoration: none; font-size: 14px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="box">
-            <h1>🔒 Enlace no válido o expirado</h1>
-            <p>${verification.reason}</p>
-            <a href="/">← Ir al inicio</a>
-          </div>
-        </body>
-        </html>
-      `);
+    // 1. Buscar orden por identificador universal (shortId, ID completo o Token)
+    const order = orderService.getOrder(idParam);
+
+    if (!order) {
+      // Si no coincide directo, intentar verificación criptográfica
+      const verification = tokenService.verifyToken(idParam, false);
+      if (!verification.valid) {
+        return res.status(404).send(`
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Invitación no encontrada</title>
+            <style>
+              body { background: #0b0b0f; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; padding: 20px; }
+              .card { background: #161620; padding: 32px 24px; border-radius: 20px; border: 1px solid #282836; max-width: 380px; }
+              h1 { font-size: 20px; margin-bottom: 10px; color: #ef4444; }
+              p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+              a { display: inline-block; background: #ef4444; color: #fff; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h1>🎈 Invitación no disponible</h1>
+              <p>El enlace que intentas abrir no existe o ha expirado.</p>
+              <a href="/">Crear una nueva tarjeta</a>
+            </div>
+          </body>
+          </html>
+        `);
+      }
     }
 
     try {
-      const { orderId } = verification.payload;
-      const order = orderService.getOrder(orderId);
+      const orderId = order ? order.id : idParam;
       const productContent = vaultService.getProtectedProductContent(orderId, order);
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      res.setHeader('Cache-Control', 'public, max-age=300'); // Cache liviano para móviles
       return res.send(productContent);
     } catch (error) {
-      return res.status(500).send('Error cargando recurso.');
+      console.error('[DownloadController] Error sirviendo tarjeta:', error);
+      return res.status(500).send('Error cargando la tarjeta de invitación.');
     }
   }
 };

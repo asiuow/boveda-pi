@@ -3,8 +3,10 @@ import { downloadController } from '../controllers/download.controller.js';
 
 const router = Router();
 
-// Enlace web directo y protegido (Sin descarga)
-router.get('/p/:token', downloadController.viewProduct);
-router.get('/v/:token', downloadController.viewProduct);
+// Rutas universales compatibles con iOS, Android, Mac, Windows, Linux y WhatsApp
+router.get('/tarjeta/:id', downloadController.viewProduct);
+router.get('/t/:id', downloadController.viewProduct);
+router.get('/p/:id', downloadController.viewProduct);
+router.get('/v/:id', downloadController.viewProduct);
 
 export default router;

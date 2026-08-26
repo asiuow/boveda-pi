@@ -31,6 +31,7 @@ export const paymentController = {
       return res.status(201).json({
         success: true,
         orderId: order.id,
+        shortId: order.shortId,
         item: order.item,
         amount: order.amount,
         currency: order.currency,
@@ -65,17 +66,19 @@ export const paymentController = {
       }
 
       const isApproved = order.status === 'approved' || order.status === 'delivered';
+      const cleanUrl = `/tarjeta/${order.shortId || order.id}`;
 
       return res.json({
         success: true,
         order: {
           id: order.id,
+          shortId: order.shortId,
           status: order.status,
           amount: order.amount,
           currency: order.currency,
           createdAt: order.createdAt,
           isApproved,
-          accessUrl: isApproved ? `/p/${order.downloadToken}` : null
+          accessUrl: isApproved ? cleanUrl : null
         }
       });
     } catch (error) {
@@ -100,7 +103,7 @@ export const paymentController = {
   },
 
   /**
-   * Simulador de Pago para testing local y demostración
+   * Simulador de Pago para testing
    */
   async simulatePayment(req, res) {
     try {
@@ -114,13 +117,16 @@ export const paymentController = {
         });
       }
 
+      const cleanUrl = `/tarjeta/${order.shortId || order.id}`;
+
       return res.json({
         success: true,
         message: 'Pago simulado aprobado exitosamente.',
         order: {
           id: order.id,
+          shortId: order.shortId,
           status: order.status,
-          accessUrl: `/p/${order.downloadToken}`
+          accessUrl: cleanUrl
         }
       });
     } catch (error) {

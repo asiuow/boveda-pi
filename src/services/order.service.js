@@ -48,8 +48,11 @@ class OrderService {
    */
   createOrder(metadata = {}, cardData = {}) {
     const orderId = uuidv4();
+    const shortId = orderId.slice(0, 8); // Identificador corto universal (ej: 9af8058c)
+    
     const order = {
       id: orderId,
+      shortId: shortId,
       status: 'pending',
       item: {
         ...config.item,
@@ -80,8 +83,31 @@ class OrderService {
     return order;
   }
 
-  getOrder(orderId) {
-    return this.orders.get(orderId) || null;
+  /**
+   * Búsqueda universal por ID completo, ID corto o Token firmado
+   */
+  getOrder(identifier) {
+    if (!identifier) return null;
+
+    // 1. Coincidencia directa por ID completo
+    if (this.orders.has(identifier)) {
+      return this.orders.get(identifier);
+    }
+
+    // 2. Coincidencia por ID corto o downloadToken
+    for (const [id, ord] of this.orders.entries()) {
+      if (ord.shortId === identifier || id.startsWith(identifier) || ord.downloadToken === identifier) {
+        return ord;
+      }
+    }
+
+    // 3. Coincidencia decodificando token criptográfico
+    const verification = tokenService.verifyToken(identifier, false);
+    if (verification.valid && verification.payload?.orderId) {
+      return this.orders.get(verification.payload.orderId) || null;
+    }
+
+    return null;
   }
 
   setPreferenceId(orderId, preferenceId) {
@@ -102,10 +128,10 @@ class OrderService {
     order.paymentId = paymentDetails.id || null;
     order.paymentMethod = paymentDetails.payment_type_id || 'mercadopago';
     order.updatedAt = new Date().toISOString();
-    order.downloadToken = tokenService.generateDownloadToken(orderId);
+    order.downloadToken = tokenService.generateDownloadToken(order.id);
 
     this.saveToDisk();
-    console.log(`[OrderService] Orden ${orderId} APROBADA y guardada en persistencia.`);
+    console.log(`[OrderService] Orden ${order.id} APROBADA (ShortId: ${order.shortId}).`);
     return order;
   }
 }

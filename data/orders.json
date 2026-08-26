@@ -31,5 +31,39 @@
       "userAgent": "node"
     },
     "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "074492f3-fda6-41a4-b7f2-d5ac5d0b1038",
+    "shortId": "074492f3",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta Digital de Cumpleaños - Lucas",
+      "description": "Invitación interactiva para Lucas (10 años)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T19:46:32.013Z",
+    "updatedAt": "2026-08-26T19:46:32.896Z",
+    "preferenceId": "2210908-993dc8cd-5605-4d6a-94a4-c67eca3c959f",
+    "paymentId": "SIMULATED-PAY-1787773592896",
+    "downloadToken": "eyJvcmRlcklkIjoiMDc0NDkyZjMtZmRhNi00MWE0LWI3ZjItZDVhYzVkMGIxMDM4IiwidGltZXN0YW1wIjoxNzg3NzczNTkyODk2LCJub25jZSI6IjcxYTdmNTk3NTA0MDg5MmZkM2M4OGJjMDVjMjBjYzJmIn0.XIOcO2-fqB4dwcMeMAwS6NB51IA_sRvqRLQGtKgIIME",
+    "cardData": {
+      "name": "Lucas",
+      "age": "10",
+      "photo": "",
+      "address": "San Martin 500",
+      "city": "Rosario",
+      "date": "Viernes 25",
+      "time": "19:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
   }
 ]
