@@ -65,5 +65,79 @@
       "userAgent": "node"
     },
     "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "c9a161bd-4757-4673-beb9-bcd6a4bc22cd",
+    "shortId": "c9a161bd",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta de Bautismo - Joaquín",
+      "description": "Invitación interactiva para Joaquín (bautismo)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T21:02:21.587Z",
+    "updatedAt": "2026-08-26T21:02:22.493Z",
+    "preferenceId": "2210908-c23fd981-c8fa-4c30-8022-355e714d8355",
+    "paymentId": "SIMULATED-PAY-1787778142493",
+    "downloadToken": "eyJvcmRlcklkIjoiYzlhMTYxYmQtNDc1Ny00NjczLWJlYjktYmNkNmE0YmMyMmNkIiwidGltZXN0YW1wIjoxNzg3Nzc4MTQyNDk0LCJub25jZSI6IjE1NTNhY2NlMmI3NTM1ZDE0NDk3MmYzMmRhMTg0YzRhIn0.SpDdWk3JI-YSziqrdfecUN8Te4xODh7epZNW4KpvzhY",
+    "cardData": {
+      "eventType": "bautismo",
+      "name": "Joaquín",
+      "age": "",
+      "photo": "",
+      "address": "Av. San Martín 1540",
+      "city": "Rosario",
+      "province": "Santa Fe",
+      "country": "Argentina",
+      "date": "Domingo 12 de Octubre",
+      "time": "11:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "c381b5c6-540c-4dfc-a0f9-962a1a6d638b",
+    "shortId": "c381b5c6",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta de Bautismo - Joaquín",
+      "description": "Invitación interactiva para Joaquín (bautismo)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-08-26T21:02:38.889Z",
+    "updatedAt": "2026-08-26T21:02:39.525Z",
+    "preferenceId": "2210908-e504e0af-bb5e-49c0-863f-4ce203fd129d",
+    "paymentId": "SIMULATED-PAY-1787778159525",
+    "downloadToken": "eyJvcmRlcklkIjoiYzM4MWI1YzYtNTQwYy00ZGZjLWEwZjktOTYyYTFhNmQ2MzhiIiwidGltZXN0YW1wIjoxNzg3Nzc4MTU5NTI1LCJub25jZSI6ImUyYmE0MGU4ZjY4ODA1ZTQyZDBiOGYwM2QwMWY4ZDJhIn0.1yPAOZFlGfragIVMTnosmGeKqDEZwREr8Li_EO3Jl_U",
+    "cardData": {
+      "eventType": "bautismo",
+      "name": "Joaquín",
+      "age": "",
+      "photo": "",
+      "address": "Av. San Martín 1540",
+      "city": "Rosario",
+      "province": "Santa Fe",
+      "country": "Argentina",
+      "date": "Domingo 12 de Octubre",
+      "time": "11:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
   }
 ]

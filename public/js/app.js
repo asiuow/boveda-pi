@@ -1,4 +1,4 @@
-let currentStep = 1;
+let currentStep = 0;
 let currentOrderId = null;
 let pollInterval = null;
 let unlockedCardUrl = null;
@@ -6,13 +6,64 @@ let isAudioPlaying = false;
 
 // Estado de la tarjeta
 const cardState = {
+  eventType: 'cumpleanos',
   name: '',
   age: '',
   photo: '',
-  address: '',
+  country: 'Argentina',
+  province: '',
   city: '',
+  address: '',
   date: '',
   time: ''
+};
+
+// Modelos disponibles
+const eventModelConfig = {
+  'cumpleanos': {
+    title: '1. Cumpleaños',
+    h2: '¿Quién cumple años? 🎂',
+    desc: 'Ingresa los datos del cumpleañero/a',
+    labelName: 'Nombre del cumpleañero/a',
+    labelAge: '¿Cuántos años cumple?',
+    showAge: true,
+    badgeDefault: '¡Cumple {age} Años!',
+    headline: '¡Te invito a celebrar mi cumpleaños juntos! 🎂🎈',
+    color: '#ef4444'
+  },
+  'bautismo': {
+    title: '2. Bautismo',
+    h2: '¿Quién se bautiza? 🕊️',
+    desc: 'Ingresa los datos para la bendición',
+    labelName: 'Nombre del bautizado/a',
+    labelAge: 'Edad o fecha especial (opcional)',
+    showAge: false,
+    badgeDefault: 'Mi Bautismo 🕊️',
+    headline: 'Te invito a compartir este momento tan especial y bendecido ✨',
+    color: '#0ea5e9'
+  },
+  'asado': {
+    title: '3. Asado',
+    h2: '¿Quién invita al asado? 🥩',
+    desc: 'Detalles del anfitrión o motivo del asado',
+    labelName: 'Nombre del asador / anfitrión',
+    labelAge: 'Motivo del asado (opcional)',
+    showAge: false,
+    badgeDefault: '¡Gran Asado! 🥩🔥',
+    headline: '¡Se prende el fuego! Te invito a compartir un gran asado 🍷',
+    color: '#f97316'
+  },
+  'evento': {
+    title: '4. Evento Especial',
+    h2: '¿Nombre del evento o anfitrión? 🥂',
+    desc: 'Celebraciones, fiestas privadas o aniversarios',
+    labelName: 'Nombre del evento / anfitrión',
+    labelAge: 'Detalle adicional (opcional)',
+    showAge: false,
+    badgeDefault: 'Evento Especial 🌟',
+    headline: '¡Estás cordialmente invitado a celebrar con nosotros! 🥂',
+    color: '#8b5cf6'
+  }
 };
 
 // Elementos DOM
@@ -27,6 +78,30 @@ function showToast(msg) {
 }
 
 /**
+ * Selección interactiva de carta en el Abanico de la Home
+ */
+function selectFanCard(type, el) {
+  cardState.eventType = type;
+
+  // Traer al frente la carta seleccionada
+  document.querySelectorAll('.fan-card').forEach(card => {
+    card.classList.remove('active-front');
+  });
+  el.classList.add('active-front');
+
+  const config = eventModelConfig[type] || eventModelConfig['cumpleanos'];
+  document.getElementById('selectedModelLabel').innerText = config.title;
+  document.getElementById('selectedModelLabel').style.color = config.color;
+
+  // Adaptar textos del Paso 1
+  document.getElementById('step1Title').innerText = config.h2;
+  document.getElementById('step1Desc').innerText = config.desc;
+  document.getElementById('labelName').innerText = config.labelName;
+  document.getElementById('labelAge').innerText = config.labelAge;
+  document.getElementById('groupAge').style.display = config.showAge ? 'block' : 'none';
+}
+
+/**
  * Contador de caracteres del nombre (Máx 20 letras)
  */
 function updateCharCount() {
@@ -36,7 +111,7 @@ function updateCharCount() {
 }
 
 /**
- * Cargar, comprimir y optimizar foto para móviles (Canvas resize max 800x800)
+ * Cargar, comprimir y optimizar foto para móviles (Canvas max 800x800)
  */
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
@@ -46,7 +121,6 @@ function handlePhotoUpload(event) {
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
-      // Redimensionar para optimizar peso en móviles
       const maxDim = 800;
       let width = img.width;
       let height = img.height;
@@ -65,7 +139,6 @@ function handlePhotoUpload(event) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Comprimir a JPEG calidad 0.8
       const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
       cardState.photo = compressedDataUrl;
 
@@ -81,50 +154,52 @@ function handlePhotoUpload(event) {
 }
 
 /**
- * Navegación entre pasos del Asistente
+ * Navegación entre pasos
  */
 function goToStep(step) {
-  // Validaciones
+  // Validaciones paso 1
   if (step === 2 && currentStep === 1) {
     const name = document.getElementById('inputName').value.trim();
-    const age = document.getElementById('inputAge').value.trim();
     if (!name) {
-      alert('Por favor, ingresa el nombre del cumpleañero/a (máx. 20 letras).');
-      return;
-    }
-    if (!age) {
-      alert('Por favor, ingresa los años que cumple.');
+      alert('Por favor, ingresa el nombre (máximo 20 letras).');
       return;
     }
     cardState.name = name.slice(0, 20);
-    cardState.age = age;
+    cardState.age = document.getElementById('inputAge').value.trim();
   }
 
+  // Validaciones paso 2 (Ubicación Geográfica Precisa)
   if (step === 3 && currentStep === 2) {
-    const address = document.getElementById('inputAddress').value.trim();
+    const country = document.getElementById('inputCountry').value.trim() || 'Argentina';
+    const province = document.getElementById('inputProvince').value.trim();
     const city = document.getElementById('inputCity').value.trim();
+    const address = document.getElementById('inputAddress').value.trim();
     const date = document.getElementById('inputDate').value.trim();
     const time = document.getElementById('inputTime').value.trim();
 
-    if (!address || !city) {
-      alert('Por favor, completa la dirección y la ciudad.');
+    if (!address || !city || !province) {
+      alert('Por favor, completa Dirección, Ciudad y Provincia para que el mapa ubique con precisión el lugar.');
       return;
     }
-    cardState.address = address;
+
+    cardState.country = country;
+    cardState.province = province;
     cardState.city = city;
+    cardState.address = address;
     cardState.date = date || 'Sábado';
     cardState.time = time || '18:00 hs';
 
-    // Rellenar resumen del Panel 3
+    // Rellenar resumen Panel 3
+    const config = eventModelConfig[cardState.eventType] || eventModelConfig['cumpleanos'];
+    document.getElementById('sumModel').innerText = config.title;
     document.getElementById('sumName').innerText = cardState.name;
-    document.getElementById('sumAge').innerText = cardState.age + ' años';
+    document.getElementById('sumAge').innerText = cardState.age ? cardState.age + ' años' : '-';
     document.getElementById('sumAddress').innerText = cardState.address;
-    document.getElementById('sumCity').innerText = cardState.city;
-    document.getElementById('sumDate').innerText = cardState.date;
-    document.getElementById('sumTime').innerText = cardState.time;
+    document.getElementById('sumCityProv').innerText = `${cardState.city}, ${cardState.province}`;
+    document.getElementById('sumCountry').innerText = cardState.country;
+    document.getElementById('sumDateTime').innerText = `${cardState.date} a las ${cardState.time}`;
   }
 
-  // Detener música si se retrocede desde el paso 4
   if (currentStep === 4 && step < 4 && isAudioPlaying) {
     audioEl.pause();
     isAudioPlaying = false;
@@ -133,13 +208,13 @@ function goToStep(step) {
 
   currentStep = step;
 
-  // Actualizar paneles visibles
+  // Actualizar visibilidad de paneles
   document.querySelectorAll('.panel').forEach((p, idx) => {
-    p.classList.toggle('active', idx + 1 === step);
+    p.classList.toggle('active', idx === step);
   });
 
-  // Actualizar indicadores (dots)
-  for (let i = 1; i <= 4; i++) {
+  // Actualizar indicadores (dots 0 a 4)
+  for (let i = 0; i <= 4; i++) {
     const dot = document.getElementById(`dot${i}`);
     if (dot) dot.classList.toggle('active', i === step);
   }
@@ -148,18 +223,27 @@ function goToStep(step) {
 }
 
 /**
- * Generar la Tarjeta Final y Enfocar Mapa
+ * Generar Previsualización de la Tarjeta
  */
 function generateCardPreview() {
   goToStep(4);
 
+  const config = eventModelConfig[cardState.eventType] || eventModelConfig['cumpleanos'];
+
   // Inyectar datos en la tarjeta
   document.getElementById('cardNameTitle').innerText = cardState.name;
-  document.getElementById('cardAgeBadge').innerText = `¡Cumple ${cardState.age} Años!`;
+  
+  if (cardState.eventType === 'cumpleanos' && cardState.age) {
+    document.getElementById('cardAgeBadge').innerText = `¡Cumple ${cardState.age} Años!`;
+  } else {
+    document.getElementById('cardAgeBadge').innerText = config.badgeDefault;
+  }
+  document.getElementById('cardHeadlineText').innerText = config.headline;
+
   document.getElementById('cardDateText').innerText = cardState.date;
   document.getElementById('cardTimeText').innerText = cardState.time;
   document.getElementById('cardAddressText').innerText = cardState.address;
-  document.getElementById('cardCityText').innerText = cardState.city;
+  document.getElementById('cardCityText').innerText = `${cardState.city}, ${cardState.province} (${cardState.country})`;
 
   // Foto
   const heroPhoto = document.getElementById('cardHeroPhoto');
@@ -169,18 +253,18 @@ function generateCardPreview() {
     heroPhoto.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23ef4444"/><text x="50" y="65" font-size="40" text-anchor="middle" fill="white">🎉</text></svg>';
   }
 
-  // Enlace a Google Maps
-  const gmapsQuery = encodeURIComponent(`${cardState.address}, ${cardState.city}`);
-  document.getElementById('cardGmapsLink').href = `https://www.google.com/maps/search/?api=1&query=${gmapsQuery}`;
+  // Enlace a Google Maps con ubicación geográfica exacta
+  const exactLocationQuery = encodeURIComponent(`${cardState.address}, ${cardState.city}, ${cardState.province}, ${cardState.country}`);
+  document.getElementById('cardGmapsLink').href = `https://www.google.com/maps/search/?api=1&query=${exactLocationQuery}`;
 
-  // Geocodificar en OpenStreetMap para escala de 3 manzanas (~300 metros, delta 0.0025)
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${gmapsQuery}`)
+  // Geocodificar en OpenStreetMap (escala de 3 manzanas, delta 0.0025)
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${exactLocationQuery}`)
     .then(res => res.json())
     .then(data => {
       if (data && data.length > 0) {
         const lat = parseFloat(data[0].lat);
         const lon = parseFloat(data[0].lon);
-        const delta = 0.0025; // 3 manzanas de escala
+        const delta = 0.0025; // 3 manzanas (~250-300m)
         const bbox = `${lon - delta}%2C${lat - delta}%2C${lon + delta}%2C${lat + delta}`;
         document.getElementById('cardMapFrame').src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`;
       }
@@ -207,7 +291,7 @@ function toggleAudio() {
 }
 
 /**
- * Iniciar compra con Mercado Pago por $10 ARS
+ * Iniciar compra con Mercado Pago ($10 ARS)
  */
 async function handlePayCard() {
   const btn = document.getElementById('btnPayCard');
@@ -284,26 +368,18 @@ function handleCardApproved(order) {
   showToast('¡Tarjeta activada con éxito!');
 }
 
-/**
- * Compartir en WhatsApp la web de creación
- */
 function handleShareWhatsApp() {
-  const text = encodeURIComponent(`¡Crea tu tarjeta digital interactiva con música y mapa en pi.juguetes! 🎉\n${window.location.origin}`);
+  const text = encodeURIComponent(`¡Crea tu tarjeta digital interactiva en pi.juguetes! 🎉\n${window.location.origin}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
-/**
- * Enviar invitación final oficial por WhatsApp
- */
 function handleShareFinalInvitation() {
   if (!unlockedCardUrl) return;
-  const text = encodeURIComponent(`🎂 ¡Estás invitado al cumpleaños de ${cardState.name} (${cardState.age} años)!\n📅 Día: ${cardState.date} a las ${cardState.time}\n📍 Lugar: ${cardState.address}, ${cardState.city}\n\n🌟 Toca el enlace para ver la tarjeta interactiva con música y mapa:\n${unlockedCardUrl}`);
+  const config = eventModelConfig[cardState.eventType] || eventModelConfig['cumpleanos'];
+  const text = encodeURIComponent(`🎉 ¡Estás invitado a ${config.title.slice(3)} con ${cardState.name}!\n📅 Día: ${cardState.date} a las ${cardState.time}\n📍 Lugar: ${cardState.address}, ${cardState.city}, ${cardState.province}\n\n🌟 Toca el enlace para ver la tarjeta interactiva con música y mapa:\n${unlockedCardUrl}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
-/**
- * Simulación de Pago Aprobado
- */
 async function handleSimulateCardPayment() {
   try {
     const statusBox = document.getElementById('cardStatusBox');
