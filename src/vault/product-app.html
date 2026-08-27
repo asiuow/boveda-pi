@@ -84,13 +84,13 @@
 
     /* Foto */
     .photo-wrapper {
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 16px;
+      width: 260px;
+      height: 260px;
+      margin: 0 auto 18px;
       border-radius: 50%;
-      padding: 4px;
+      padding: 5px;
       background: linear-gradient(135deg, {{THEME_COLOR}}, #f59e0b);
-      box-shadow: 0 0 25px {{THEME_COLOR}}55;
+      box-shadow: 0 0 35px {{THEME_COLOR}}55;
     }
 
     .photo-img {
@@ -307,11 +307,6 @@
       </a>
     </div>
 
-    <!-- Compartir por WhatsApp -->
-    <button class="btn-whatsapp" onclick="shareInvitation()">
-      📲 Compartir Invitación por WhatsApp
-    </button>
-
     <footer>
       Invitación Oficial • pi.juguetes
     </footer>
@@ -372,11 +367,6 @@
           }
         })
         .catch(() => {});
-    }
-
-    function shareInvitation() {
-      const text = encodeURIComponent(window.location.href);
-      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     }
   </script>
 </body>
