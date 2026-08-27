@@ -22,42 +22,111 @@
       <div id="dot4" class="step-dot"></div>
     </div>
 
-    <!-- PANEL 0: HOME - 4 CARTAS EN FORMA DE ABANICO -->
+    <!-- PANEL 0: HOME - 10 CARTAS CON CARROUSEL TUMBLER (DRAG & TILT) -->
     <section id="panel0" class="panel active">
       <h2>Elige tu Tarjeta 🎴</h2>
-      <p class="panel-desc">Toca una carta para traerla al frente y personalizarla</p>
+      <p class="panel-desc">Desliza con drag de derecha a izquierda los 10 modelos disponibles</p>
 
-      <!-- Escena de Cartas Superpuestas en Abanico -->
-      <div class="fan-scene">
-        
-        <!-- 1. Cumpleaños -->
-        <div id="cardCumple" class="fan-card card-cumple active-front" onclick="selectFanCard('cumpleanos', this)">
-          <div class="fan-card-icon">🎂</div>
-          <div class="fan-card-title">Cumpleaños</div>
-          <div class="fan-card-subtitle">Festejo y Torta</div>
+      <!-- Carousel Koningsdagtuimelcarrousel Style -->
+      <div class="tumbler-carousel-container">
+        <div id="cardsCarousel" class="tumbler-carousel">
+          
+          <!-- 1. Cumpleaños -->
+          <button class="tumbler-card outer active-front" style="--index: 1; --card-color: #ef4444;" onclick="handleCarouselCardSelect('cumpleanos', this)">
+            <div class="tumbler-card-inner" style="--index: -1;">
+              <div class="card-num">01/10</div>
+              <div class="card-emoji">🎂</div>
+              <div class="card-label">Cumpleaños</div>
+            </div>
+          </button>
+
+          <!-- 2. Bautismo -->
+          <button class="tumbler-card outer" style="--index: 2; --card-color: #0ea5e9;" onclick="handleCarouselCardSelect('bautismo', this)">
+            <div class="tumbler-card-inner" style="--index: -2;">
+              <div class="card-num">02/10</div>
+              <div class="card-emoji">🕊️</div>
+              <div class="card-label">Bautismo</div>
+            </div>
+          </button>
+
+          <!-- 3. Asado -->
+          <button class="tumbler-card outer" style="--index: 3; --card-color: #f97316;" onclick="handleCarouselCardSelect('asado', this)">
+            <div class="tumbler-card-inner" style="--index: -3;">
+              <div class="card-num">03/10</div>
+              <div class="card-emoji">🥩</div>
+              <div class="card-label">Asado</div>
+            </div>
+          </button>
+
+          <!-- 4. Evento VIP -->
+          <button class="tumbler-card outer" style="--index: 4; --card-color: #8b5cf6;" onclick="handleCarouselCardSelect('evento', this)">
+            <div class="tumbler-card-inner" style="--index: -4;">
+              <div class="card-num">04/10</div>
+              <div class="card-emoji">🥂</div>
+              <div class="card-label">Evento VIP</div>
+            </div>
+          </button>
+
+          <!-- 5. Casamiento -->
+          <button class="tumbler-card outer" style="--index: 5; --card-color: #ec4899;" onclick="handleCarouselCardSelect('casamiento', this)">
+            <div class="tumbler-card-inner" style="--index: -5;">
+              <div class="card-num">05/10</div>
+              <div class="card-emoji">💍</div>
+              <div class="card-label">Casamiento</div>
+            </div>
+          </button>
+
+          <!-- 6. Graduación -->
+          <button class="tumbler-card outer" style="--index: 6; --card-color: #3b82f6;" onclick="handleCarouselCardSelect('graduacion', this)">
+            <div class="tumbler-card-inner" style="--index: -6;">
+              <div class="card-num">06/10</div>
+              <div class="card-emoji">🎓</div>
+              <div class="card-label">Graduación</div>
+            </div>
+          </button>
+
+          <!-- 7. Pizza Party -->
+          <button class="tumbler-card outer" style="--index: 7; --card-color: #eab308;" onclick="handleCarouselCardSelect('pizza', this)">
+            <div class="tumbler-card-inner" style="--index: -7;">
+              <div class="card-num">07/10</div>
+              <div class="card-emoji">🍕</div>
+              <div class="card-label">Pizza Party</div>
+            </div>
+          </button>
+
+          <!-- 8. Pool Party -->
+          <button class="tumbler-card outer" style="--index: 8; --card-color: #14b8a6;" onclick="handleCarouselCardSelect('poolparty', this)">
+            <div class="tumbler-card-inner" style="--index: -8;">
+              <div class="card-num">08/10</div>
+              <div class="card-emoji">🏖️</div>
+              <div class="card-label">Pool Party</div>
+            </div>
+          </button>
+
+          <!-- 9. Noche de Fiesta -->
+          <button class="tumbler-card outer" style="--index: 9; --card-color: #10b981;" onclick="handleCarouselCardSelect('tematica', this)">
+            <div class="tumbler-card-inner" style="--index: -9;">
+              <div class="card-num">09/10</div>
+              <div class="card-emoji">🎭</div>
+              <div class="card-label">Fiesta</div>
+            </div>
+          </button>
+
+          <!-- 10. Cervezada -->
+          <button class="tumbler-card outer" style="--index: 10; --card-color: #d97706;" onclick="handleCarouselCardSelect('cervezada', this)">
+            <div class="tumbler-card-inner" style="--index: -10;">
+              <div class="card-num">10/10</div>
+              <div class="card-emoji">🍻</div>
+              <div class="card-label">Cervezada</div>
+            </div>
+          </button>
+
         </div>
+      </div>
 
-        <!-- 2. Bautismo -->
-        <div id="cardBautismo" class="fan-card card-bautismo" onclick="selectFanCard('bautismo', this)">
-          <div class="fan-card-icon">🕊️</div>
-          <div class="fan-card-title">Bautismo</div>
-          <div class="fan-card-subtitle">Bendición y Amor</div>
-        </div>
-
-        <!-- 3. Asado -->
-        <div id="cardAsado" class="fan-card card-asado" onclick="selectFanCard('asado', this)">
-          <div class="fan-card-icon">🥩</div>
-          <div class="fan-card-title">Asado</div>
-          <div class="fan-card-subtitle">Amigos y Fuego</div>
-        </div>
-
-        <!-- 4. Evento -->
-        <div id="cardEvento" class="fan-card card-evento" onclick="selectFanCard('evento', this)">
-          <div class="fan-card-icon">🥂</div>
-          <div class="fan-card-title">Evento</div>
-          <div class="fan-card-subtitle">Celebración</div>
-        </div>
-
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px; margin-bottom: 12px; font-size: 12px; color: #9ca3af;">
+        <span>👉 Arrastra para ver</span>
+        <span>10 modelos</span>
       </div>
 
       <div style="text-align: center; margin-bottom: 16px;">

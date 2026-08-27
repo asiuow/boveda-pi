@@ -28,36 +28,84 @@ export const vaultService = {
 
     const eventLabels = {
       'cumpleanos': {
-        ogTitle: 'Te invito a mi cumple 🎉',
+        ogTitle: 'Te invito a mi fiesta',
         ogDesc: 'Toca para ver la invitación',
-        shareText: 'Te invito a mi cumple 🎉',
+        shareText: 'Te invito a mi fiesta',
         badge: card.age ? `¡Cumple ${card.age} Años!` : '¡Feliz Cumpleaños!',
-        headline: '¡Te invito a festejar mi cumpleaños juntos! 🎂🎈',
+        headline: '¡Te invito a celebrar mi cumpleaños juntos! 🎂🎈',
         themeColor: '#ef4444'
       },
       'bautismo': {
-        ogTitle: 'Te invito a mi bautismo 🕊️',
+        ogTitle: 'Te invito a mi fiesta',
         ogDesc: 'Toca para ver la invitación',
-        shareText: 'Te invito a mi bautismo 🕊️',
+        shareText: 'Te invito a mi fiesta',
         badge: 'Mi Bautismo 🕊️',
         headline: 'Te invito a compartir este momento tan especial y bendecido ✨',
         themeColor: '#0ea5e9'
       },
       'asado': {
-        ogTitle: 'Te invito a un asado 🥩',
+        ogTitle: 'Te invito a mi fiesta',
         ogDesc: 'Toca para ver la invitación',
-        shareText: 'Te invito a un asado 🥩',
+        shareText: 'Te invito a mi fiesta',
         badge: '¡Gran Asado! 🥩🔥',
         headline: '¡Se prende el fuego! Te invito a compartir un gran asado 🍷',
         themeColor: '#f97316'
       },
       'evento': {
-        ogTitle: 'Te invito a mi evento 🥂',
+        ogTitle: 'Te invito a mi fiesta',
         ogDesc: 'Toca para ver la invitación',
-        shareText: 'Te invito a mi evento 🥂',
+        shareText: 'Te invito a mi fiesta',
         badge: 'Evento Especial 🌟',
         headline: '¡Estás cordialmente invitado a celebrar con nosotros! 🥂',
         themeColor: '#8b5cf6'
+      },
+      'casamiento': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Nos Casamos! 💍💐',
+        headline: '¡El día más feliz de nuestras vidas! Acompáñanos a festejar 🥂',
+        themeColor: '#ec4899'
+      },
+      'graduacion': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Graduación! 🎓🎉',
+        headline: '¡Objetivo cumplido! Ven a festejar mi graduación con todo 🎓✨',
+        themeColor: '#3b82f6'
+      },
+      'pizza': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Pizza Party! 🍕🍻',
+        headline: '¡Pizzas calientes, buena música y amigos! No faltes 🍕✨',
+        themeColor: '#eab308'
+      },
+      'poolparty': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Pool Party! ☀️🏊‍♂️',
+        headline: '¡Trae malla, toalla y ganas de festejar al sol! 🏖️💦',
+        themeColor: '#14b8a6'
+      },
+      'tematica': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Fiesta Temática! 🎭✨',
+        headline: '¡Prepara tu mejor look y ven a divertirte con nosotros! 🪩',
+        themeColor: '#10b981'
+      },
+      'cervezada': {
+        ogTitle: 'Te invito a mi fiesta',
+        ogDesc: 'Toca para ver la invitación',
+        shareText: 'Te invito a mi fiesta',
+        badge: '¡Cervezada & After! 🍻🥨',
+        headline: '¡Cervezas bien frías y amigos para brindar juntos! 🍻',
+        themeColor: '#d97706'
       }
     };
 

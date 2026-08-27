@@ -18,7 +18,7 @@ const cardState = {
   time: ''
 };
 
-// Modelos disponibles
+// 10 Modelos disponibles
 const eventModelConfig = {
   'cumpleanos': {
     title: '1. Cumpleaños',
@@ -29,7 +29,6 @@ const eventModelConfig = {
     showAge: true,
     badgeDefault: '¡Cumple {age} Años!',
     headline: '¡Te invito a celebrar mi cumpleaños juntos! 🎂🎈',
-    shareText: 'Te invito a mi cumple 🎉',
     color: '#ef4444'
   },
   'bautismo': {
@@ -37,90 +36,125 @@ const eventModelConfig = {
     h2: '¿Quién se bautiza? 🕊️',
     desc: 'Ingresa los datos para la bendición',
     labelName: 'Nombre del bautizado/a',
-    labelAge: 'Edad o fecha especial (opcional)',
+    labelAge: 'Detalle especial (opcional)',
     showAge: false,
     badgeDefault: 'Mi Bautismo 🕊️',
     headline: 'Te invito a compartir este momento tan especial y bendecido ✨',
-    shareText: 'Te invito a mi bautismo 🕊️',
     color: '#0ea5e9'
   },
   'asado': {
     title: '3. Asado',
     h2: '¿Quién invita al asado? 🥩',
-    desc: 'Detalles del anfitrión o motivo del asado',
+    desc: 'Detalles del asador o motivo del asado',
     labelName: 'Nombre del asador / anfitrión',
     labelAge: 'Motivo del asado (opcional)',
     showAge: false,
     badgeDefault: '¡Gran Asado! 🥩🔥',
     headline: '¡Se prende el fuego! Te invito a compartir un gran asado 🍷',
-    shareText: 'Te invito a un asado 🥩',
     color: '#f97316'
   },
   'evento': {
-    title: '4. Evento Especial',
+    title: '4. Evento VIP',
     h2: '¿Nombre del evento o anfitrión? 🥂',
-    desc: 'Celebraciones, fiestas privadas o aniversarios',
+    desc: 'Celebraciones exclusivas, galas o aniversarios',
     labelName: 'Nombre del evento / anfitrión',
     labelAge: 'Detalle adicional (opcional)',
     showAge: false,
     badgeDefault: 'Evento Especial 🌟',
     headline: '¡Estás cordialmente invitado a celebrar con nosotros! 🥂',
-    shareText: 'Te invito a mi evento 🥂',
     color: '#8b5cf6'
+  },
+  'casamiento': {
+    title: '5. Casamiento',
+    h2: '¿Quiénes se casan? 💍',
+    desc: 'Nombres de los novios o de la pareja',
+    labelName: 'Nombres de la pareja',
+    labelAge: 'Frase o detalle especial (opcional)',
+    showAge: false,
+    badgeDefault: '¡Nos Casamos! 💍💐',
+    headline: '¡El día más feliz de nuestras vidas! Acompáñanos a festejar 🥂',
+    color: '#ec4899'
+  },
+  'graduacion': {
+    title: '6. Graduación',
+    h2: '¿Quién se gradúa? 🎓',
+    desc: 'Ingresa los datos del egresado/a',
+    labelName: 'Nombre del egresado/a',
+    labelAge: 'Título o carrera (opcional)',
+    showAge: false,
+    badgeDefault: '¡Graduación! 🎓🎉',
+    headline: '¡Objetivo cumplido! Ven a festejar mi graduación con todo 🎓✨',
+    color: '#3b82f6'
+  },
+  'pizza': {
+    title: '7. Pizza Party',
+    h2: '¿Quién es el anfitrión? 🍕',
+    desc: 'Noche de pizzas, bebidas y amigos',
+    labelName: 'Nombre del anfitrión / homenajeado',
+    labelAge: 'Edad o motivo (opcional)',
+    showAge: true,
+    badgeDefault: '¡Pizza Party! 🍕🍻',
+    headline: '¡Pizzas calientes, buena música y amigos! No faltes 🍕✨',
+    color: '#eab308'
+  },
+  'poolparty': {
+    title: '8. Pool Party',
+    h2: '¿Quién invita a la pileta? 🏖️',
+    desc: 'Tarde de sol, pileta y diversión',
+    labelName: 'Nombre del anfitrión',
+    labelAge: 'Detalle o edad (opcional)',
+    showAge: true,
+    badgeDefault: '¡Pool Party! ☀️🏊‍♂️',
+    headline: '¡Trae malla, toalla y ganas de festejar al sol! 🏖️💦',
+    color: '#14b8a6'
+  },
+  'tematica': {
+    title: '9. Noche de Fiesta',
+    h2: '¿Nombre de la fiesta o anfitrión? 🎭',
+    desc: 'Noche temática, disfraces o baile',
+    labelName: 'Nombre del evento / anfitrión',
+    labelAge: 'Temática o detalle (opcional)',
+    showAge: false,
+    badgeDefault: '¡Fiesta Temática! 🎭✨',
+    headline: '¡Prepara tu mejor look y ven a divertirte con nosotros! 🪩',
+    color: '#10b981'
+  },
+  'cervezada': {
+    title: '10. Cervezada',
+    h2: '¿Quién organiza la juntada? 🍻',
+    desc: 'After office, bar y amigos',
+    labelName: 'Nombre del organizador',
+    labelAge: 'Lugar o motivo (opcional)',
+    showAge: false,
+    badgeDefault: '¡Cervezada & After! 🍻🥨',
+    headline: '¡Cervezas bien frías y amigos para brindar juntos! 🍻',
+    color: '#d97706'
   }
 };
 
-// Elementos DOM
-const audioEl = document.getElementById('previewAudio');
-const btnPlayMusic = document.getElementById('btnPlayMusic');
-const toastEl = document.getElementById('toast');
-
-function showToast(msg) {
-  toastEl.innerText = msg;
-  toastEl.classList.add('show');
-  setTimeout(() => toastEl.classList.remove('show'), 2500);
-}
-
 /**
- * Pop-up Divertido Personalizado (Fondo Blanco, Esquinas Redondeadas, Gris Claro Bold)
+ * Selección interactiva de carta en el Carousel Tumbler (10 modelos)
  */
-function showFunModal({ emoji = '🎉', title = '¡Un momentito!', text = '' }) {
-  const emojiEl = document.getElementById('funModalEmoji');
-  const titleEl = document.getElementById('funModalTitle');
-  const textEl = document.getElementById('funModalText');
-  const overlayEl = document.getElementById('funModalOverlay');
-  if (emojiEl) emojiEl.innerText = emoji;
-  if (titleEl) titleEl.innerText = title;
-  if (textEl) textEl.innerText = text;
-  if (overlayEl) overlayEl.classList.add('show');
-}
-
-function closeFunModal() {
-  const overlayEl = document.getElementById('funModalOverlay');
-  if (overlayEl) overlayEl.classList.remove('show');
-}
-
-function handleFunModalOverlayClick(event) {
-  if (event.target.id === 'funModalOverlay') {
-    closeFunModal();
+function handleCarouselCardSelect(type, el) {
+  const carousel = document.getElementById('cardsCarousel');
+  if (carousel && carousel.dataset.hasMoved === 'true') {
+    return; // Evita seleccionar si fue un arrastre con drag
   }
-}
 
-/**
- * Selección interactiva de carta en el Abanico de la Home
- */
-function selectFanCard(type, el) {
   cardState.eventType = type;
 
-  // Traer al frente la carta seleccionada
-  document.querySelectorAll('.fan-card').forEach(card => {
+  // Resaltar la carta seleccionada
+  document.querySelectorAll('.tumbler-card').forEach(card => {
     card.classList.remove('active-front');
   });
   el.classList.add('active-front');
 
   const config = eventModelConfig[type] || eventModelConfig['cumpleanos'];
-  document.getElementById('selectedModelLabel').innerText = config.title;
-  document.getElementById('selectedModelLabel').style.color = config.color;
+  const label = document.getElementById('selectedModelLabel');
+  if (label) {
+    label.innerText = config.title;
+    label.style.color = config.color;
+  }
 
   // Adaptar textos del Paso 1
   document.getElementById('step1Title').innerText = config.h2;
@@ -128,6 +162,68 @@ function selectFanCard(type, el) {
   document.getElementById('labelName').innerText = config.labelName;
   document.getElementById('labelAge').innerText = config.labelAge;
   document.getElementById('groupAge').style.display = config.showAge ? 'block' : 'none';
+
+  // Centrar suavemente la tarjeta seleccionada en el carousel
+  el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+}
+
+/**
+ * Inicializador del Carousel Tumbler con soporte Drag Touch & Mouse (Desktop & Mobile)
+ */
+function initTumblerCarousel() {
+  const carousel = document.getElementById('cardsCarousel');
+  if (!carousel) return;
+
+  carousel.dataset.hasMoved = 'false';
+
+  // Actualizar rotación/tumbler dinámico en scroll
+  function updateTilt() {
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    if (maxScroll > 0) {
+      const progress = carousel.scrollLeft / maxScroll;
+      const rotateFrame = -8 + (progress * 16);
+      carousel.style.setProperty('--rotate-frame', rotateFrame);
+    }
+  }
+
+  carousel.addEventListener('scroll', updateTilt, { passive: true });
+  updateTilt();
+
+  // Soporte Mouse Drag en PC/Mac
+  let isDown = false;
+  let startX = 0;
+  let scrollStart = 0;
+  let moved = false;
+
+  carousel.addEventListener('mousedown', (e) => {
+    isDown = true;
+    moved = false;
+    carousel.dataset.hasMoved = 'false';
+    carousel.classList.add('dragging');
+    startX = e.pageX - carousel.offsetLeft;
+    scrollStart = carousel.scrollLeft;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    if (Math.abs(walk) > 5) {
+      moved = true;
+      carousel.dataset.hasMoved = 'true';
+    }
+    carousel.scrollLeft = scrollStart - walk;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      carousel.classList.remove('dragging');
+      setTimeout(() => {
+        carousel.dataset.hasMoved = 'false';
+      }, 50);
+    }
+  });
 }
 
 /**
@@ -480,4 +576,11 @@ async function handleSimulateCardPayment() {
       text: err.message || 'Ocurrió un detalle en la simulación.'
     });
   }
+}
+
+// Inicializar el Carousel Tumbler al cargar
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTumblerCarousel);
+} else {
+  initTumblerCarousel();
 }
