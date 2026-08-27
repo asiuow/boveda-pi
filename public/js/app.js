@@ -341,8 +341,10 @@ function toggleAudio() {
  */
 async function handlePayCard() {
   const btn = document.getElementById('btnPayCard');
-  btn.disabled = true;
-  btn.innerText = 'Conectando con Mercado Pago...';
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+  }
 
   try {
     const res = await fetch('/api/create-preference', {
@@ -358,18 +360,23 @@ async function handlePayCard() {
         title: '¡Un momento!',
         text: data.error || 'No se pudo generar el pago en este momento. Por favor intenta de nuevo.'
       });
-      btn.disabled = false;
-      btn.innerText = '💳 Comprar tarjeta por 10 pesos';
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
       return;
     }
 
     currentOrderId = data.orderId;
     const statusBox = document.getElementById('cardStatusBox');
-    statusBox.style.display = 'block';
-    statusBox.className = 'status-box';
-    document.getElementById('statusSpinner').style.display = 'block';
-    document.getElementById('statusMsg').innerText = 'Esperando confirmación en Mercado Pago...';
-    document.getElementById('unlockedActions').style.display = 'none';
+    if (statusBox) {
+      statusBox.style.display = 'block';
+      statusBox.className = 'status-box';
+      const spinner = document.getElementById('statusSpinner');
+      if (spinner) spinner.style.display = 'block';
+      const msg = document.getElementById('statusMsg');
+      if (msg) msg.innerText = 'Esperando confirmación en Mercado Pago...';
+    }
 
     startCardPolling(currentOrderId);
 
@@ -378,16 +385,20 @@ async function handlePayCard() {
       window.open(checkoutUrl, '_blank');
     }
 
-    btn.disabled = false;
-    btn.innerText = 'Reabrir Mercado Pago';
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
   } catch (err) {
     showFunModal({
       emoji: '📡⚠️',
       title: 'Conexión interrumpida',
       text: 'No pudimos comunicarnos con el servidor. Revisa tu conexión e inténtalo nuevamente.'
     });
-    btn.disabled = false;
-    btn.innerText = '💳 Comprar tarjeta por 10 pesos';
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
   }
 }
 
@@ -435,10 +446,13 @@ function handleShareFinalInvitation() {
 async function handleSimulateCardPayment() {
   try {
     const statusBox = document.getElementById('cardStatusBox');
-    statusBox.style.display = 'block';
-    document.getElementById('statusSpinner').style.display = 'block';
-    document.getElementById('statusMsg').innerText = 'Simulando pago de $10...';
-    document.getElementById('unlockedActions').style.display = 'none';
+    if (statusBox) {
+      statusBox.style.display = 'block';
+      const spinner = document.getElementById('statusSpinner');
+      if (spinner) spinner.style.display = 'block';
+      const msg = document.getElementById('statusMsg');
+      if (msg) msg.innerText = 'Simulando pago de $10...';
+    }
 
     const resPref = await fetch('/api/create-preference', {
       method: 'POST',
@@ -454,7 +468,7 @@ async function handleSimulateCardPayment() {
     const resSim = await fetch(`/api/simulate-payment/${prefData.orderId}`, { method: 'POST' });
     const simData = await resSim.json();
 
-    if (simData.success) {
+    if (simData.success && simData.order) {
       handleCardApproved({ accessUrl: simData.order.accessUrl });
     } else {
       throw new Error(simData.error || 'Error en la simulación');
