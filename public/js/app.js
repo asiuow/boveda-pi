@@ -256,6 +256,50 @@ function animateDeckTo(targetFraction, customDuration = 320) {
   requestAnimationFrame(stepAnimation);
 }
 
+// ========================================================
+// CONTROLADOR DEL DEDO TUTORIAL CON INACTIVIDAD DE 30s
+// ========================================================
+let fingerInactivityTimer = null;
+const FINGER_INACTIVITY_DELAY = 30000; // 30 segundos de inactividad
+
+function showFingerTutorial() {
+  const fingerEl = document.getElementById('fingerTutorial');
+  if (!fingerEl) return;
+  // Solo mostrar en panel 0 (abanico de modelos)
+  if (typeof currentStep !== 'undefined' && currentStep !== 0) return;
+
+  fingerEl.classList.remove('is-dismissing');
+  fingerEl.classList.remove('is-active');
+  // Forzar reflow para reiniciar la animación CSS fluidamente
+  void fingerEl.offsetWidth;
+  fingerEl.classList.add('is-active');
+}
+
+function dismissFingerTutorial() {
+  const fingerEl = document.getElementById('fingerTutorial');
+  if (fingerEl && fingerEl.classList.contains('is-active')) {
+    fingerEl.classList.add('is-dismissing');
+    fingerEl.classList.remove('is-active');
+  }
+}
+
+function scheduleNextFingerTutorial() {
+  if (fingerInactivityTimer) {
+    clearTimeout(fingerInactivityTimer);
+    fingerInactivityTimer = null;
+  }
+  if (typeof currentStep === 'undefined' || currentStep === 0) {
+    fingerInactivityTimer = setTimeout(() => {
+      showFingerTutorial();
+    }, FINGER_INACTIVITY_DELAY);
+  }
+}
+
+function handleUserActivityForTutorial() {
+  dismissFingerTutorial();
+  scheduleNextFingerTutorial();
+}
+
 function initDeckStage() {
   const stage = document.getElementById('deckStage');
   if (!stage) return;
@@ -292,14 +336,7 @@ function initDeckStage() {
     const cards = document.querySelectorAll('.deck-card');
     cards.forEach(c => c.classList.add('no-transition'));
 
-    const finger = document.getElementById('fingerTutorial');
-    if (finger) {
-      finger.style.transition = 'opacity 0.18s ease';
-      finger.style.opacity = '0';
-      setTimeout(() => {
-        if (finger && finger.parentNode) finger.remove();
-      }, 200);
-    }
+    handleUserActivityForTutorial();
   }
 
   function onPointerMove(e) {
@@ -390,45 +427,51 @@ function initDeckStage() {
     }
   }, { passive: false });
 
-  // Dedo tutorial: aparece 1 segundo después de cargar las imágenes del abanico
+  // Dedo tutorial: aparece 1 segundo después de cargar imágenes, y tras cada 30s de inactividad
   const fingerEl = document.getElementById('fingerTutorial');
   if (fingerEl) {
     const deckImages = Array.from(document.querySelectorAll('.deck-card img'));
     let activated = false;
 
-    function activateFingerTutorial() {
+    function initialTutorialTrigger() {
       if (activated) return;
       activated = true;
       setTimeout(() => {
-        if (fingerEl && fingerEl.parentNode) {
-          fingerEl.classList.add('is-active');
-        }
-      }, 1000); // 1 segundo después de cargar las imágenes
+        showFingerTutorial();
+      }, 1000); // 1 segundo exacto tras cargar las imágenes
     }
 
     if (deckImages.length === 0) {
-      activateFingerTutorial();
+      initialTutorialTrigger();
     } else {
       let pending = deckImages.length;
       deckImages.forEach(img => {
         if (img.complete && img.naturalHeight !== 0) {
           pending--;
-          if (pending <= 0) activateFingerTutorial();
+          if (pending <= 0) initialTutorialTrigger();
         } else {
           const onDone = () => {
             pending--;
-            if (pending <= 0) activateFingerTutorial();
+            if (pending <= 0) initialTutorialTrigger();
           };
           img.addEventListener('load', onDone, { once: true });
           img.addEventListener('error', onDone, { once: true });
         }
       });
-      // Timeout de respaldo por seguridad si alguna imagen tarda
-      setTimeout(activateFingerTutorial, 2000);
+      setTimeout(initialTutorialTrigger, 2000);
     }
 
-    fingerEl.addEventListener('animationend', () => {
-      if (fingerEl && fingerEl.parentNode) fingerEl.remove();
+    // Al finalizar la animación (2 pasadas y fade out), programar la reaparición a los 30s
+    fingerEl.addEventListener('animationend', (e) => {
+      if (e.target === fingerEl) {
+        fingerEl.classList.remove('is-active');
+        scheduleNextFingerTutorial();
+      }
+    });
+
+    // Detectores de actividad para reiniciar el temporizador de 30s
+    ['pointerdown', 'touchstart', 'touchmove', 'mousemove', 'wheel', 'keydown'].forEach(evt => {
+      window.addEventListener(evt, handleUserActivityForTutorial, { passive: true });
     });
   }
 
@@ -559,6 +602,17 @@ function goToStep(step) {
   }
 
   currentStep = step;
+
+  // Si salimos del panel 0, ocultar dedo y pausar timer; si volvemos al abanico (0), reiniciar timer de 30s
+  if (step !== 0) {
+    dismissFingerTutorial();
+    if (fingerInactivityTimer) {
+      clearTimeout(fingerInactivityTimer);
+      fingerInactivityTimer = null;
+    }
+  } else {
+    scheduleNextFingerTutorial();
+  }
 
   // Actualizar visibilidad de paneles
   document.querySelectorAll('.panel').forEach((p, idx) => {

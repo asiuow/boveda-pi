@@ -297,10 +297,17 @@ h2 {
   filter: blur(8px);
 }
 
-/* Se activa 1 segundo después de cargar las imágenes */
+/* Se activa tras 1 segundo o por inactividad de 30 segundos */
 .finger-tutorial-hint.is-active {
   visibility: visible;
   animation: tutorialFadeDoublePass 2.4s ease-in-out forwards;
+}
+
+/* Descarte instantáneo al tocar o interactuar con la pantalla */
+.finger-tutorial-hint.is-dismissing {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.18s ease;
 }
 
 /* Flechas superiores: permanecen totalmente quietas indicando dirección */
