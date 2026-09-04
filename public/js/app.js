@@ -134,7 +134,7 @@ const eventModelConfig = {
 
 /**
  * ========================================================
- * CONTROLADOR 3D DECK (BOCETO 1.SVG CON DRAG FLUIDO)
+ * CONTROLADOR ABANICO 3D DE 10 TARJETAS (DRAG & SWIPE FLUIDO)
  * ========================================================
  */
 const deckModelKeys = [
@@ -145,7 +145,6 @@ const deckModelKeys = [
 let deckActiveIndex = 0;
 let deckCurrentFraction = 0;
 const totalDeckCards = 10;
-let isAnimatingDeck = false;
 
 function updateDeckCards(fraction = deckCurrentFraction) {
   const cards = document.querySelectorAll('.deck-card');
@@ -155,55 +154,39 @@ function updateDeckCards(fraction = deckCurrentFraction) {
     const diff = idx - fraction;
     const absDiff = Math.abs(diff);
 
-    let tx = 0;
-    let ty = 0;
-    let tz = 0;
-    let rotZ = 0;
-    let scale = 1;
-    let zIndex = 10;
-    let opacity = 1;
+    // Separación horizontal amplia para forma de abanico abierto
+    const tx = diff * 64; 
+    
+    // Curvatura del abanico: las cartas de los lados caen ligeramente formando un arco
+    const ty = Math.pow(absDiff, 1.25) * 8.5;
+    
+    // Profundidad 3D
+    const tz = 120 - absDiff * 25;
+    
+    // Rotación angular del abanico: izquierda negativo, derecha positivo
+    const rotZ = diff * 7.2;
+    
+    // Escala suave para profundidad
+    const scale = Math.max(0.68, 1 - absDiff * 0.065);
+    
+    // Z-Index: la carta central siempre está por encima de las adyacentes
+    const zIndex = Math.max(1, Math.round(50 - absDiff * 3));
+    
+    // Opacidad: se ven abiertas en abanico incluso extendiéndose hacia los costados
+    const opacity = Math.max(0.2, 1 - absDiff * 0.12);
 
-    if (absDiff < 0.08) {
-      // Centro activo (escala 1.0, 0 deg)
-      tx = 0;
-      ty = 0;
-      tz = 120;
-      rotZ = 0;
-      scale = 1.0;
-      zIndex = 30;
-      opacity = 1;
+    if (absDiff < 0.15) {
       card.style.borderColor = '#e12b5b';
-      card.style.boxShadow = '0 18px 40px rgba(225, 43, 91, 0.45), 0 6px 14px rgba(0, 0, 0, 0.2)';
-    } else if (diff > 0) {
-      // Pila hacia la derecha (inclinada en perspectiva como 1.svg)
-      const clamped = Math.min(diff, 4.5);
-      tx = clamped * 38;
-      ty = clamped * 7;
-      tz = 100 - clamped * 35;
-      rotZ = -(8 + clamped * 3.8); // Inclinación hacia la derecha
-      scale = Math.max(0.42, 1 - clamped * 0.12);
-      zIndex = Math.round(30 - diff * 2);
-      opacity = Math.max(0, 1 - diff * 0.18);
-      card.style.borderColor = 'rgba(231, 61, 118, 0.7)';
-      card.style.boxShadow = '0 8px 22px rgba(0, 0, 0, 0.22)';
+      card.style.boxShadow = '0 20px 42px rgba(225, 43, 91, 0.45), 0 8px 18px rgba(0, 0, 0, 0.22)';
     } else {
-      // Pila hacia la izquierda (inclinada en perspectiva como 1.svg)
-      const clamped = Math.max(diff, -4.5);
-      tx = clamped * 38;
-      ty = -clamped * -7;
-      tz = 100 + clamped * 35;
-      rotZ = -clamped * 4.2; // Inclinación hacia la izquierda
-      scale = Math.max(0.42, 1 + clamped * 0.12);
-      zIndex = Math.round(30 + diff * 2);
-      opacity = Math.max(0, 1 + diff * 0.18);
-      card.style.borderColor = 'rgba(231, 61, 118, 0.7)';
-      card.style.boxShadow = '0 8px 22px rgba(0, 0, 0, 0.22)';
+      card.style.borderColor = 'rgba(225, 43, 91, 0.5)';
+      card.style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.18)';
     }
 
     card.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotate(${rotZ}deg) scale(${scale})`;
     card.style.zIndex = zIndex;
     card.style.opacity = opacity;
-    card.style.visibility = opacity <= 0.02 ? 'hidden' : 'visible';
+    card.style.visibility = opacity <= 0.05 ? 'hidden' : 'visible';
   });
 
   // Actualizar modelo seleccionado en el estado global
@@ -211,6 +194,19 @@ function updateDeckCards(fraction = deckCurrentFraction) {
   const type = deckModelKeys[rounded] || 'cumpleanos';
   cardState.eventType = type;
   const config = eventModelConfig[type] || eventModelConfig['cumpleanos'];
+
+  // Actualizar tag dinámico bajo el abanico
+  const tagEl = document.getElementById('deckCurrentTag');
+  if (tagEl) {
+    const emojis = {
+      'cumpleanos': '🎂', 'bautismo': '🕊️', 'asado': '🥩', 'evento': '🥂',
+      'casamiento': '💍', 'graduacion': '🎓', 'pizza': '🍕', 'poolparty': '🏖️',
+      'tematica': '🎭', 'cervezada': '🍻'
+    };
+    const emoji = emojis[type] || '🎴';
+    const num = String(rounded + 1).padStart(2, '0');
+    tagEl.innerText = `${emoji} Modelo ${num} / 10: ${config.title.replace(/^\d+\.\s*/, '')}`;
+  }
 
   // Adaptar textos del Paso 1 para que coincidan con el modelo elegido
   const step1Title = document.getElementById('step1Title');
@@ -235,16 +231,15 @@ function selectDeckCard(targetIndex) {
   animateDeckTo(targetIndex);
 }
 
-function animateDeckTo(targetFraction) {
+function animateDeckTo(targetFraction, customDuration = 320) {
   const start = deckCurrentFraction;
   const change = targetFraction - start;
-  const duration = 280;
   let startTime = null;
 
   function stepAnimation(timestamp) {
     if (!startTime) startTime = timestamp;
-    const progress = Math.min(1, (timestamp - startTime) / duration);
-    // Curva cúbica suave
+    const progress = Math.min(1, (timestamp - startTime) / customDuration);
+    // Easing elástico/suave
     const ease = 1 - Math.pow(1 - progress, 3);
     deckCurrentFraction = start + change * ease;
     updateDeckCards(deckCurrentFraction);
@@ -267,16 +262,30 @@ function initDeckStage() {
 
   let isDragging = false;
   let startX = 0;
+  let startY = 0;
   let startFraction = 0;
   let dragMoved = false;
+  let startTime = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let velocityX = 0;
 
   function onPointerDown(e) {
     isDragging = true;
     dragMoved = false;
     stage.dataset.hasMoved = 'false';
     stage.classList.add('is-dragging');
-    startX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY) || 0;
+
+    startX = clientX;
+    startY = clientY;
+    lastX = clientX;
+    startTime = Date.now();
+    lastTime = startTime;
     startFraction = deckCurrentFraction;
+    velocityX = 0;
 
     const cards = document.querySelectorAll('.deck-card');
     cards.forEach(c => c.classList.add('no-transition'));
@@ -284,19 +293,32 @@ function initDeckStage() {
 
   function onPointerMove(e) {
     if (!isDragging) return;
-    const currentX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
-    const deltaX = currentX - startX;
 
-    if (Math.abs(deltaX) > 6) {
+    const currentX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+    const currentY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY) || 0;
+
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    // Medir velocidad
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 10) {
+      velocityX = (currentX - lastX) / dt;
+      lastX = currentX;
+      lastTime = now;
+    }
+
+    if (Math.abs(deltaX) > 5) {
       dragMoved = true;
       stage.dataset.hasMoved = 'true';
     }
 
-    // Sensibilidad del arrastre: 180px arrastrados = 1 tarjeta completa
-    const fractionDelta = -deltaX / 170;
+    // Sensibilidad muy ágil y directa (85px = 1 carta)
+    const fractionDelta = -deltaX / 85;
     let targetFraction = startFraction + fractionDelta;
 
-    // Límites estrictos 0 a 9 (al terminar se detiene y hay que hacer drag a la inversa)
+    // Resistencia elástica en los límites (0 y 9)
     if (targetFraction < 0) {
       targetFraction = targetFraction * 0.2;
     } else if (targetFraction > totalDeckCards - 1) {
@@ -316,25 +338,46 @@ function initDeckStage() {
     const cards = document.querySelectorAll('.deck-card');
     cards.forEach(c => c.classList.remove('no-transition'));
 
-    // Snap a la tarjeta más cercana
-    let snapIndex = Math.round(deckCurrentFraction);
-    snapIndex = Math.max(0, Math.min(totalDeckCards - 1, snapIndex));
-    animateDeckTo(snapIndex);
+    // Calcular inercia / impulso si el usuario lanzó el dedo rápido
+    let targetSnap = Math.round(deckCurrentFraction);
+    if (Math.abs(velocityX) > 0.4) {
+      if (velocityX < -0.4) {
+        // Deslizamiento rápido hacia la izquierda -> avanzar
+        targetSnap = Math.ceil(deckCurrentFraction);
+      } else if (velocityX > 0.4) {
+        // Deslizamiento rápido hacia la derecha -> retroceder
+        targetSnap = Math.floor(deckCurrentFraction);
+      }
+    }
+
+    targetSnap = Math.max(0, Math.min(totalDeckCards - 1, targetSnap));
+    animateDeckTo(targetSnap, 320);
 
     setTimeout(() => {
       stage.dataset.hasMoved = 'false';
-    }, 60);
+    }, 80);
   }
 
-  // Mouse events en PC/Mac
+  // Escuchar en el escenario de tarjetas
   stage.addEventListener('mousedown', onPointerDown);
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('mouseup', onPointerUp);
 
-  // Touch events en Móviles
+  // Touch en toda el área general del abanico
   stage.addEventListener('touchstart', onPointerDown, { passive: true });
   window.addEventListener('touchmove', onPointerMove, { passive: true });
   window.addEventListener('touchend', onPointerUp);
+
+  // Soporte de rueda de ratón o trackpad horizontal
+  stage.addEventListener('wheel', (e) => {
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY * 0.5;
+    if (Math.abs(delta) > 15) {
+      const step = delta > 0 ? 1 : -1;
+      const target = Math.max(0, Math.min(totalDeckCards - 1, Math.round(deckCurrentFraction) + step));
+      animateDeckTo(target, 250);
+      e.preventDefault();
+    }
+  }, { passive: false });
 
   // Render inicial en tarjeta 0
   updateDeckCards(0);

@@ -101,14 +101,18 @@ h2 {
 /* ========================================================
    DISEÑO INTRO EXACTO A 1.SVG (FONDO CORAL/CREMA + DECK 3D)
    ======================================================== */
+/* ========================================================
+   DISEÑO INTRO EXACTO A 1.SVG (FONDO CORAL/CREMA + ABANICO)
+   ======================================================== */
 #panel0.panel-intro-design {
   background: #f4e8db !important;
   color: #4c4e6b !important;
   border: 1.5px solid rgba(225, 43, 91, 0.25) !important;
-  padding: 0 0 28px 0 !important;
+  padding: 0 0 24px 0 !important;
   border-radius: 26px !important;
-  overflow: hidden !important;
+  overflow: visible !important; /* Permite que el abanico se extienda hacia afuera */
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6) !important;
+  position: relative;
 }
 
 .intro-top-bar-wrap {
@@ -116,6 +120,7 @@ h2 {
   background: #e12b5b;
   overflow: hidden;
   line-height: 0;
+  border-radius: 24px 24px 0 0;
 }
 
 .intro-top-banner {
@@ -125,7 +130,7 @@ h2 {
 }
 
 .intro-header-content {
-  padding: 16px 18px 0;
+  padding: 14px 18px 0;
   text-align: center;
 }
 
@@ -167,24 +172,25 @@ h2 {
   font-size: 13px;
   font-weight: 600;
   color: #4c4e6b !important;
-  max-width: 320px;
+  max-width: 330px;
   margin: 4px auto 0;
   line-height: 1.35;
   text-align: center;
 }
 
 /* ========================================================
-   MUESTRA BOCETO 3D DECK (COVER FLOW CON DRAG)
+   ABANICO DE TARJETAS 3D (DESPLIEGUE AMPLIO Y DRAG FLUIDO)
    ======================================================== */
 .deck-stage {
   position: relative;
   width: 100%;
-  height: 375px;
-  margin: 10px 0 16px;
+  height: 350px;
+  margin: 10px 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1000px;
+  perspective: 1200px;
+  overflow: visible; /* Las tarjetas se abren en abanico hacia los lados */
   touch-action: pan-y;
   user-select: none;
   cursor: grab;
@@ -196,17 +202,18 @@ h2 {
 
 .deck-card {
   position: absolute;
-  width: 235px;
-  height: 325px;
+  width: 205px;
+  height: 280px;
   border-radius: 14px;
   overflow: hidden;
-  border: 2px solid #e73d76;
+  border: 2px solid rgba(225, 43, 91, 0.6);
   background: #ffffff;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
-  transform-origin: center bottom;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  transform-origin: center 115%; /* Pivote en la base para forma de abanico */
   transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   cursor: pointer;
   outline: none;
+  will-change: transform, opacity;
 }
 
 .deck-card.no-transition {
@@ -223,23 +230,43 @@ h2 {
 
 .deck-card-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(225, 43, 91, 0.92);
+  top: 8px;
+  left: 8px;
+  background: rgba(225, 43, 91, 0.94);
   color: #ffffff;
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-size: 11px;
   font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 12px;
+  padding: 3px 8px;
+  border-radius: 10px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
   letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+/* Indicador de modelo seleccionado bajo el abanico */
+.deck-info-bar {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.deck-model-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #e12b5b;
+  background: rgba(225, 43, 91, 0.1);
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 43, 91, 0.25);
 }
 
 /* Botón Continuar... Único en Intro */
 .intro-button-row {
   text-align: center;
-  margin-top: 4px;
   padding: 0 16px;
 }
 
