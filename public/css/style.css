@@ -104,13 +104,16 @@ h2 {
 /* ========================================================
    DISEÑO INTRO EXACTO A 1.SVG (FONDO CORAL/CREMA + ABANICO)
    ======================================================== */
+/* ========================================================
+   DISEÑO INTRO EXACTO A 1.SVG (FONDO CORAL/CREMA + ABANICO)
+   ======================================================== */
 #panel0.panel-intro-design {
   background: #f4e8db !important;
   color: #4c4e6b !important;
   border: 1.5px solid rgba(225, 43, 91, 0.25) !important;
   padding: 0 0 24px 0 !important;
   border-radius: 26px !important;
-  overflow: visible !important; /* Permite que el abanico se extienda hacia afuera */
+  overflow: hidden !important; /* MÁSCARA: no pasa del área clara o fondo */
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6) !important;
   position: relative;
 }
@@ -179,18 +182,28 @@ h2 {
 }
 
 /* ========================================================
-   ABANICO DE TARJETAS 3D (DESPLIEGUE AMPLIO Y DRAG FLUIDO)
+   MARCO / MÁSCARA DEL ABANICO (ÁREA BLANCA DELIMITADA)
    ======================================================== */
+.deck-stage-frame {
+  position: relative;
+  background: #ffffff; /* Área blanca */
+  border-radius: 20px;
+  margin: 10px 14px 12px;
+  overflow: hidden; /* MÁSCARA: ninguna tarjeta pasa fuera de este marco */
+  border: 1.5px solid rgba(225, 43, 91, 0.2);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
 .deck-stage {
   position: relative;
   width: 100%;
-  height: 350px;
-  margin: 10px 0 12px;
+  height: 330px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1200px;
-  overflow: visible; /* Las tarjetas se abren en abanico hacia los lados */
+  perspective: 1100px;
+  overflow: visible; /* El abanico se abre libremente y el frame exterior lo enmascara */
   touch-action: pan-y;
   user-select: none;
   cursor: grab;
@@ -202,13 +215,13 @@ h2 {
 
 .deck-card {
   position: absolute;
-  width: 205px;
-  height: 280px;
+  width: 190px;
+  height: 265px;
   border-radius: 14px;
   overflow: hidden;
-  border: 2px solid rgba(225, 43, 91, 0.6);
+  border: 2px solid rgba(225, 43, 91, 0.55);
   background: #ffffff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
   transform-origin: center 115%; /* Pivote en la base para forma de abanico */
   transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   cursor: pointer;

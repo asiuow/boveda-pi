@@ -154,33 +154,33 @@ function updateDeckCards(fraction = deckCurrentFraction) {
     const diff = idx - fraction;
     const absDiff = Math.abs(diff);
 
-    // Separación horizontal amplia para forma de abanico abierto
-    const tx = diff * 64; 
+    // Separación horizontal equilibrada para abanico dentro del marco blanco
+    const tx = diff * 48; 
     
-    // Curvatura del abanico: las cartas de los lados caen ligeramente formando un arco
-    const ty = Math.pow(absDiff, 1.25) * 8.5;
+    // Curvatura del abanico: arco suave hacia la base
+    const ty = Math.pow(absDiff, 1.22) * 7.5;
     
     // Profundidad 3D
-    const tz = 120 - absDiff * 25;
+    const tz = 100 - absDiff * 22;
     
     // Rotación angular del abanico: izquierda negativo, derecha positivo
-    const rotZ = diff * 7.2;
+    const rotZ = diff * 6.2;
     
-    // Escala suave para profundidad
-    const scale = Math.max(0.68, 1 - absDiff * 0.065);
+    // Escala suave para profundidad dentro del marco
+    const scale = Math.max(0.72, 1 - absDiff * 0.055);
     
     // Z-Index: la carta central siempre está por encima de las adyacentes
     const zIndex = Math.max(1, Math.round(50 - absDiff * 3));
     
-    // Opacidad: se ven abiertas en abanico incluso extendiéndose hacia los costados
-    const opacity = Math.max(0.2, 1 - absDiff * 0.12);
+    // Opacidad: visible y nítida dentro del marco
+    const opacity = Math.max(0.2, 1 - absDiff * 0.14);
 
     if (absDiff < 0.15) {
       card.style.borderColor = '#e12b5b';
-      card.style.boxShadow = '0 20px 42px rgba(225, 43, 91, 0.45), 0 8px 18px rgba(0, 0, 0, 0.22)';
+      card.style.boxShadow = '0 16px 36px rgba(225, 43, 91, 0.4), 0 6px 14px rgba(0, 0, 0, 0.18)';
     } else {
-      card.style.borderColor = 'rgba(225, 43, 91, 0.5)';
-      card.style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.18)';
+      card.style.borderColor = 'rgba(225, 43, 91, 0.45)';
+      card.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.14)';
     }
 
     card.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotate(${rotZ}deg) scale(${scale})`;
@@ -259,6 +259,8 @@ function animateDeckTo(targetFraction, customDuration = 320) {
 function initDeckStage() {
   const stage = document.getElementById('deckStage');
   if (!stage) return;
+
+  const touchTarget = document.querySelector('.deck-stage-frame') || stage;
 
   let isDragging = false;
   let startX = 0;
@@ -358,18 +360,18 @@ function initDeckStage() {
     }, 80);
   }
 
-  // Escuchar en el escenario de tarjetas
-  stage.addEventListener('mousedown', onPointerDown);
+  // Escuchar en todo el marco blanco del abanico
+  touchTarget.addEventListener('mousedown', onPointerDown);
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('mouseup', onPointerUp);
 
-  // Touch en toda el área general del abanico
-  stage.addEventListener('touchstart', onPointerDown, { passive: true });
+  // Touch en toda el área blanca del marco
+  touchTarget.addEventListener('touchstart', onPointerDown, { passive: true });
   window.addEventListener('touchmove', onPointerMove, { passive: true });
   window.addEventListener('touchend', onPointerUp);
 
   // Soporte de rueda de ratón o trackpad horizontal
-  stage.addEventListener('wheel', (e) => {
+  touchTarget.addEventListener('wheel', (e) => {
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY * 0.5;
     if (Math.abs(delta) > 15) {
       const step = delta > 0 ? 1 : -1;
