@@ -294,12 +294,11 @@ function initDeckStage() {
 
     const finger = document.getElementById('fingerTutorial');
     if (finger) {
-      finger.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+      finger.style.transition = 'opacity 0.18s ease';
       finger.style.opacity = '0';
-      finger.style.transform = 'translate(-50%, -50%) scale(0.3)';
       setTimeout(() => {
         if (finger && finger.parentNode) finger.remove();
-      }, 220);
+      }, 200);
     }
   }
 

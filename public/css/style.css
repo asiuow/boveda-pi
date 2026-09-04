@@ -261,57 +261,77 @@ h2 {
 }
 
 /* ========================================================
-   DEDO VECTORIAL ANIMADO (dedos.svg) - TUTORIAL DRAG
+   DEDO VECTORIAL ANIMADO (dedos.svg) - TUTORIAL DRAG FLUIDO
    ======================================================== */
 .finger-tutorial-hint {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 90px;
-  height: 108px;
-  transform-origin: center bottom; /* Eje de rotación en la base */
+  width: 92px;
+  height: 110px;
+  transform: translate(-50%, -50%);
   z-index: 70;
   pointer-events: none;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
-  animation: fingerSwipeTutorial 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  will-change: transform, opacity;
+  animation: tutorialFadeInOut 1.8s ease-in-out forwards;
+  will-change: opacity;
 }
 
-.finger-tutorial-hint img {
+/* Flechas superiores: permanecen totalmente quietas indicando dirección */
+.finger-tutorial-hint .finger-arrows {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   display: block;
+  pointer-events: none;
 }
 
-@keyframes fingerSwipeTutorial {
+/* Mano: animación rápida, continua y ultra fluida desde la base */
+.finger-tutorial-hint .finger-hand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  transform-origin: 50% 95%; /* Eje de rotación en la base de la mano */
+  animation: handSwipeFluid 1.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+/* Transición suave global de entrada y salida sin pausas bruscas */
+@keyframes tutorialFadeInOut {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) translateX(40px) translateY(18px) scale(0.45) rotate(14deg);
   }
-  18% { /* ~0.5s: Aparece de transparente a 100% visible agrandando a escala natural */
+  16% {
     opacity: 1;
-    transform: translate(-50%, -50%) translateX(32px) translateY(0px) scale(1) rotate(10deg);
   }
-  32% { /* Simula apoyar el dedo sobre la tarjeta central */
+  74% {
     opacity: 1;
-    transform: translate(-50%, -50%) translateX(28px) translateY(-5px) scale(1) rotate(8deg);
   }
-  64% { /* Desliza suavemente simulando pasar la página con rotación desde la base */
-    opacity: 1;
-    transform: translate(-50%, -50%) translateX(-50px) translateY(6px) scale(1) rotate(-14deg);
-  }
-  78% { /* Pausa / remate del gesto */
-    opacity: 0.95;
-    transform: translate(-50%, -50%) translateX(-42px) translateY(2px) scale(0.95) rotate(-9deg);
-  }
-  90% { /* Comienza a achicarse y desvanecerse */
-    opacity: 0.5;
-    transform: translate(-50%, -50%) translateX(-65px) translateY(12px) scale(0.65) rotate(-16deg);
-  }
-  100% { /* 3s+: Desaparece en transición transparente a escala chica */
+  100% {
     opacity: 0;
-    transform: translate(-50%, -50%) translateX(-80px) translateY(22px) scale(0.35) rotate(-20deg);
     visibility: hidden;
+  }
+}
+
+/* Movimiento continuo y orgánico de la mano deslizando sin escalados discordantes */
+@keyframes handSwipeFluid {
+  0% {
+    transform: translateX(4px) rotate(1deg);
+  }
+  15% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  65% {
+    transform: translateX(-56px) rotate(-16deg);
+  }
+  100% {
+    transform: translateX(-66px) rotate(-18deg);
   }
 }
 
