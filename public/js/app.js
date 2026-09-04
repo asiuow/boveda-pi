@@ -133,97 +133,211 @@ const eventModelConfig = {
 };
 
 /**
- * Selección interactiva de carta en el Carousel Tumbler (10 modelos)
+ * ========================================================
+ * CONTROLADOR 3D DECK (BOCETO 1.SVG CON DRAG FLUIDO)
+ * ========================================================
  */
-function handleCarouselCardSelect(type, el) {
-  const carousel = document.getElementById('cardsCarousel');
-  if (carousel && carousel.dataset.hasMoved === 'true') {
-    return; // Evita seleccionar si fue un arrastre con drag
-  }
+const deckModelKeys = [
+  'cumpleanos', 'bautismo', 'asado', 'evento', 'casamiento',
+  'graduacion', 'pizza', 'poolparty', 'tematica', 'cervezada'
+];
 
-  cardState.eventType = type;
+let deckActiveIndex = 0;
+let deckCurrentFraction = 0;
+const totalDeckCards = 10;
+let isAnimatingDeck = false;
 
-  // Resaltar la carta seleccionada
-  document.querySelectorAll('.tumbler-card').forEach(card => {
-    card.classList.remove('active-front');
+function updateDeckCards(fraction = deckCurrentFraction) {
+  const cards = document.querySelectorAll('.deck-card');
+  if (!cards.length) return;
+
+  cards.forEach((card, idx) => {
+    const diff = idx - fraction;
+    const absDiff = Math.abs(diff);
+
+    let tx = 0;
+    let ty = 0;
+    let tz = 0;
+    let rotZ = 0;
+    let scale = 1;
+    let zIndex = 10;
+    let opacity = 1;
+
+    if (absDiff < 0.08) {
+      // Centro activo (escala 1.0, 0 deg)
+      tx = 0;
+      ty = 0;
+      tz = 120;
+      rotZ = 0;
+      scale = 1.0;
+      zIndex = 30;
+      opacity = 1;
+      card.style.borderColor = '#e12b5b';
+      card.style.boxShadow = '0 18px 40px rgba(225, 43, 91, 0.45), 0 6px 14px rgba(0, 0, 0, 0.2)';
+    } else if (diff > 0) {
+      // Pila hacia la derecha (inclinada en perspectiva como 1.svg)
+      const clamped = Math.min(diff, 4.5);
+      tx = clamped * 38;
+      ty = clamped * 7;
+      tz = 100 - clamped * 35;
+      rotZ = -(8 + clamped * 3.8); // Inclinación hacia la derecha
+      scale = Math.max(0.42, 1 - clamped * 0.12);
+      zIndex = Math.round(30 - diff * 2);
+      opacity = Math.max(0, 1 - diff * 0.18);
+      card.style.borderColor = 'rgba(231, 61, 118, 0.7)';
+      card.style.boxShadow = '0 8px 22px rgba(0, 0, 0, 0.22)';
+    } else {
+      // Pila hacia la izquierda (inclinada en perspectiva como 1.svg)
+      const clamped = Math.max(diff, -4.5);
+      tx = clamped * 38;
+      ty = -clamped * -7;
+      tz = 100 + clamped * 35;
+      rotZ = -clamped * 4.2; // Inclinación hacia la izquierda
+      scale = Math.max(0.42, 1 + clamped * 0.12);
+      zIndex = Math.round(30 + diff * 2);
+      opacity = Math.max(0, 1 + diff * 0.18);
+      card.style.borderColor = 'rgba(231, 61, 118, 0.7)';
+      card.style.boxShadow = '0 8px 22px rgba(0, 0, 0, 0.22)';
+    }
+
+    card.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotate(${rotZ}deg) scale(${scale})`;
+    card.style.zIndex = zIndex;
+    card.style.opacity = opacity;
+    card.style.visibility = opacity <= 0.02 ? 'hidden' : 'visible';
   });
-  el.classList.add('active-front');
 
+  // Actualizar modelo seleccionado en el estado global
+  const rounded = Math.round(Math.max(0, Math.min(totalDeckCards - 1, fraction)));
+  const type = deckModelKeys[rounded] || 'cumpleanos';
+  cardState.eventType = type;
   const config = eventModelConfig[type] || eventModelConfig['cumpleanos'];
-  const label = document.getElementById('selectedModelLabel');
-  if (label) {
-    label.innerText = config.title;
-    label.style.color = config.color;
-  }
 
-  // Adaptar textos del Paso 1
-  document.getElementById('step1Title').innerText = config.h2;
-  document.getElementById('step1Desc').innerText = config.desc;
-  document.getElementById('labelName').innerText = config.labelName;
-  document.getElementById('labelAge').innerText = config.labelAge;
-  document.getElementById('groupAge').style.display = config.showAge ? 'block' : 'none';
-
-  // Centrar suavemente la tarjeta seleccionada en el carousel
-  el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  // Adaptar textos del Paso 1 para que coincidan con el modelo elegido
+  const step1Title = document.getElementById('step1Title');
+  if (step1Title) step1Title.innerText = config.h2;
+  const step1Desc = document.getElementById('step1Desc');
+  if (step1Desc) step1Desc.innerText = config.desc;
+  const labelName = document.getElementById('labelName');
+  if (labelName) labelName.innerText = config.labelName;
+  const labelAge = document.getElementById('labelAge');
+  if (labelAge) labelAge.innerText = config.labelAge;
+  const groupAge = document.getElementById('groupAge');
+  if (groupAge) groupAge.style.display = config.showAge ? 'block' : 'none';
 }
 
-/**
- * Inicializador del Carousel Tumbler con soporte Drag Touch & Mouse (Desktop & Mobile)
- */
-function initTumblerCarousel() {
-  const carousel = document.getElementById('cardsCarousel');
-  if (!carousel) return;
+function selectDeckCard(targetIndex) {
+  const stage = document.getElementById('deckStage');
+  if (stage && stage.dataset.hasMoved === 'true') {
+    return; // Evita clic accidental durante arrastre
+  }
+  targetIndex = Math.max(0, Math.min(totalDeckCards - 1, targetIndex));
+  deckActiveIndex = targetIndex;
+  animateDeckTo(targetIndex);
+}
 
-  carousel.dataset.hasMoved = 'false';
+function animateDeckTo(targetFraction) {
+  const start = deckCurrentFraction;
+  const change = targetFraction - start;
+  const duration = 280;
+  let startTime = null;
 
-  // Actualizar rotación/tumbler dinámico en scroll
-  function updateTilt() {
-    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-    if (maxScroll > 0) {
-      const progress = carousel.scrollLeft / maxScroll;
-      const rotateFrame = -8 + (progress * 16);
-      carousel.style.setProperty('--rotate-frame', rotateFrame);
+  function stepAnimation(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min(1, (timestamp - startTime) / duration);
+    // Curva cúbica suave
+    const ease = 1 - Math.pow(1 - progress, 3);
+    deckCurrentFraction = start + change * ease;
+    updateDeckCards(deckCurrentFraction);
+
+    if (progress < 1) {
+      requestAnimationFrame(stepAnimation);
+    } else {
+      deckCurrentFraction = targetFraction;
+      deckActiveIndex = Math.round(targetFraction);
+      updateDeckCards(deckCurrentFraction);
     }
   }
 
-  carousel.addEventListener('scroll', updateTilt, { passive: true });
-  updateTilt();
+  requestAnimationFrame(stepAnimation);
+}
 
-  // Soporte Mouse Drag en PC/Mac
-  let isDown = false;
+function initDeckStage() {
+  const stage = document.getElementById('deckStage');
+  if (!stage) return;
+
+  let isDragging = false;
   let startX = 0;
-  let scrollStart = 0;
-  let moved = false;
+  let startFraction = 0;
+  let dragMoved = false;
 
-  carousel.addEventListener('mousedown', (e) => {
-    isDown = true;
-    moved = false;
-    carousel.dataset.hasMoved = 'false';
-    carousel.classList.add('dragging');
-    startX = e.pageX - carousel.offsetLeft;
-    scrollStart = carousel.scrollLeft;
-  });
+  function onPointerDown(e) {
+    isDragging = true;
+    dragMoved = false;
+    stage.dataset.hasMoved = 'false';
+    stage.classList.add('is-dragging');
+    startX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+    startFraction = deckCurrentFraction;
 
-  window.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    const x = e.pageX - carousel.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    if (Math.abs(walk) > 5) {
-      moved = true;
-      carousel.dataset.hasMoved = 'true';
+    const cards = document.querySelectorAll('.deck-card');
+    cards.forEach(c => c.classList.add('no-transition'));
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const currentX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+    const deltaX = currentX - startX;
+
+    if (Math.abs(deltaX) > 6) {
+      dragMoved = true;
+      stage.dataset.hasMoved = 'true';
     }
-    carousel.scrollLeft = scrollStart - walk;
-  });
 
-  window.addEventListener('mouseup', () => {
-    if (isDown) {
-      isDown = false;
-      carousel.classList.remove('dragging');
-      setTimeout(() => {
-        carousel.dataset.hasMoved = 'false';
-      }, 50);
+    // Sensibilidad del arrastre: 180px arrastrados = 1 tarjeta completa
+    const fractionDelta = -deltaX / 170;
+    let targetFraction = startFraction + fractionDelta;
+
+    // Límites estrictos 0 a 9 (al terminar se detiene y hay que hacer drag a la inversa)
+    if (targetFraction < 0) {
+      targetFraction = targetFraction * 0.2;
+    } else if (targetFraction > totalDeckCards - 1) {
+      const over = targetFraction - (totalDeckCards - 1);
+      targetFraction = (totalDeckCards - 1) + over * 0.2;
     }
-  });
+
+    deckCurrentFraction = targetFraction;
+    updateDeckCards(deckCurrentFraction);
+  }
+
+  function onPointerUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    stage.classList.remove('is-dragging');
+
+    const cards = document.querySelectorAll('.deck-card');
+    cards.forEach(c => c.classList.remove('no-transition'));
+
+    // Snap a la tarjeta más cercana
+    let snapIndex = Math.round(deckCurrentFraction);
+    snapIndex = Math.max(0, Math.min(totalDeckCards - 1, snapIndex));
+    animateDeckTo(snapIndex);
+
+    setTimeout(() => {
+      stage.dataset.hasMoved = 'false';
+    }, 60);
+  }
+
+  // Mouse events en PC/Mac
+  stage.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+
+  // Touch events en Móviles
+  stage.addEventListener('touchstart', onPointerDown, { passive: true });
+  window.addEventListener('touchmove', onPointerMove, { passive: true });
+  window.addEventListener('touchend', onPointerUp);
+
+  // Render inicial en tarjeta 0
+  updateDeckCards(0);
 }
 
 /**
@@ -578,9 +692,9 @@ async function handleSimulateCardPayment() {
   }
 }
 
-// Inicializar el Carousel Tumbler al cargar
+// Inicializar el 3D Deck al cargar
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initTumblerCarousel);
+  document.addEventListener('DOMContentLoaded', initDeckStage);
 } else {
-  initTumblerCarousel();
+  initDeckStage();
 }

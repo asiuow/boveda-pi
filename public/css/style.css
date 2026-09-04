@@ -99,140 +99,179 @@ h2 {
 }
 
 /* ========================================================
-   CAROUSEL TUMBLER DE 10 CARTAS (INSPIRADO EN CODEPEN)
+   DISEÑO INTRO EXACTO A 1.SVG (FONDO CORAL/CREMA + DECK 3D)
    ======================================================== */
-:root {
-  --rotate-frame: 0;
-  --rotate-increment: -3.5deg;
+#panel0.panel-intro-design {
+  background: #f4e8db !important;
+  color: #4c4e6b !important;
+  border: 1.5px solid rgba(225, 43, 91, 0.25) !important;
+  padding: 0 0 28px 0 !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6) !important;
 }
 
-@property --rotate-frame {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
-@keyframes scrollAnim {
-  0% {
-    --rotate-frame: -8;
-  }
-  100% {
-    --rotate-frame: 8;
-  }
-}
-
-.tumbler-carousel-container {
+.intro-top-bar-wrap {
   width: 100%;
-  position: relative;
-  margin: 5px 0 16px;
+  background: #e12b5b;
   overflow: hidden;
+  line-height: 0;
 }
 
-.tumbler-carousel {
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
-  overflow-y: hidden;
-  height: fit-content;
-  -webkit-overflow-scrolling: touch;
-  padding: 24px 14px 28px;
-  gap: 14px;
+.intro-top-banner {
   width: 100%;
-  animation: scrollAnim linear;
-  animation-timeline: scroll(self inline);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-  scroll-snap-type: x mandatory;
-  cursor: grab;
-  user-select: none;
+  height: auto;
+  display: block;
 }
 
-.tumbler-carousel::-webkit-scrollbar {
-  height: 5px;
+.intro-header-content {
+  padding: 16px 18px 0;
+  text-align: center;
 }
 
-.tumbler-carousel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-}
-
-.tumbler-carousel.dragging {
-  cursor: grabbing;
-  scroll-snap-type: none;
-}
-
-.tumbler-card {
-  scroll-snap-align: center;
-  transform: rotate(
-    calc(var(--rotate-frame, 0) * var(--index) * var(--rotate-increment))
-  );
+.intro-title-row {
+  display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.intro-step-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e12b5b;
+  color: #f4e8db;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
   display: flex;
-  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-  flex: 0 0 auto;
-  width: 95px;
-  aspect-ratio: 2/3;
-  background: #181824;
-  border: 2px solid #2d2d3f;
-  border-radius: 16px;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.45);
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(225, 43, 91, 0.35);
+}
+
+.intro-title {
+  font-family: 'Fredoka', 'Nunito', 'Hoss Round', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #e12b5b !important;
+  letter-spacing: -0.4px;
+  margin: 0;
+  text-align: left;
+}
+
+.intro-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4c4e6b !important;
+  max-width: 320px;
+  margin: 4px auto 0;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* ========================================================
+   MUESTRA BOCETO 3D DECK (COVER FLOW CON DRAG)
+   ======================================================== */
+.deck-stage {
   position: relative;
+  width: 100%;
+  height: 375px;
+  margin: 10px 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.deck-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.deck-card {
+  position: absolute;
+  width: 235px;
+  height: 325px;
+  border-radius: 14px;
   overflow: hidden;
-  padding: 8px 6px;
+  border: 2px solid #e73d76;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  transform-origin: center bottom;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   cursor: pointer;
   outline: none;
 }
 
-.tumbler-card-inner {
+.deck-card.no-transition {
+  transition: none !important;
+}
+
+.deck-card img {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  transform: rotate(
-    calc(var(--rotate-frame, 0) * var(--index) * var(--rotate-increment) * -0.6)
-  );
+  object-fit: cover;
+  display: block;
   pointer-events: none;
 }
 
-.card-num {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--card-color, #ef4444);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2px 6px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.card-emoji {
-  font-size: 36px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-}
-
-.card-label {
+.deck-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(225, 43, 91, 0.92);
+  color: #ffffff;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
   font-size: 11px;
-  font-weight: 700;
-  color: #f3f4f6;
-  line-height: 1.15;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.5px;
+}
+
+/* Botón Continuar... Único en Intro */
+.intro-button-row {
   text-align: center;
+  margin-top: 4px;
+  padding: 0 16px;
 }
 
-.tumbler-card:hover {
-  border-color: var(--card-color, #ef4444);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+.btn-intro-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 56px;
+  background: #e12b5b;
+  color: #ffffff;
+  font-family: 'Fredoka', 'Nunito', 'Hoss Round', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  border-radius: 35px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(225, 43, 91, 0.45);
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+  outline: none;
 }
 
-.tumbler-card.active-front {
-  border-color: var(--card-color, #ef4444) !important;
-  background: #20202e !important;
-  box-shadow: 0 0 25px var(--card-color, #ef4444), 0 16px 36px rgba(0, 0, 0, 0.7) !important;
-  transform: scale(1.1) rotate(0deg) !important;
-  z-index: 20 !important;
+.btn-intro-continue:hover {
+  background: #cc234f;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(225, 43, 91, 0.55);
+}
+
+.btn-intro-continue:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 15px rgba(225, 43, 91, 0.35);
 }
 
 /* ========================================================
