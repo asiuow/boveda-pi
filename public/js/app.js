@@ -154,33 +154,33 @@ function updateDeckCards(fraction = deckCurrentFraction) {
     const diff = idx - fraction;
     const absDiff = Math.abs(diff);
 
-    // Separación horizontal equilibrada para abanico dentro del marco blanco
-    const tx = diff * 48; 
+    // Separación horizontal amplia para que las cartas se vean hacia los costados
+    const tx = diff * 58; 
     
     // Curvatura del abanico: arco suave hacia la base
-    const ty = Math.pow(absDiff, 1.22) * 7.5;
+    const ty = Math.pow(absDiff, 1.2) * 8.0;
     
     // Profundidad 3D
-    const tz = 100 - absDiff * 22;
+    const tz = 110 - absDiff * 20;
     
     // Rotación angular del abanico: izquierda negativo, derecha positivo
-    const rotZ = diff * 6.2;
+    const rotZ = diff * 6.6;
     
-    // Escala suave para profundidad dentro del marco
-    const scale = Math.max(0.72, 1 - absDiff * 0.055);
+    // Escala suave para profundidad
+    const scale = Math.max(0.76, 1 - absDiff * 0.05);
     
     // Z-Index: la carta central siempre está por encima de las adyacentes
     const zIndex = Math.max(1, Math.round(50 - absDiff * 3));
     
-    // Opacidad: visible y nítida dentro del marco
-    const opacity = Math.max(0.2, 1 - absDiff * 0.14);
+    // Opacidad alta para que las cartas se vean claras hacia los costados
+    const opacity = Math.max(0.65, 1 - absDiff * 0.1);
 
     if (absDiff < 0.15) {
       card.style.borderColor = '#e12b5b';
-      card.style.boxShadow = '0 16px 36px rgba(225, 43, 91, 0.4), 0 6px 14px rgba(0, 0, 0, 0.18)';
+      card.style.boxShadow = '0 18px 40px rgba(225, 43, 91, 0.45), 0 6px 14px rgba(0, 0, 0, 0.2)';
     } else {
-      card.style.borderColor = 'rgba(225, 43, 91, 0.45)';
-      card.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.14)';
+      card.style.borderColor = 'rgba(225, 43, 91, 0.5)';
+      card.style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.15)';
     }
 
     card.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotate(${rotZ}deg) scale(${scale})`;

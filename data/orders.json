@@ -583,5 +583,42 @@
       "userAgent": "node"
     },
     "paymentMethod": "simulated_credit_card"
+  },
+  {
+    "id": "4a6dd657-fb7d-4ba7-b0d8-c55439f93010",
+    "shortId": "4a6dd657",
+    "status": "approved",
+    "item": {
+      "id": "prod-tarjeta-cumple-01",
+      "title": "Tarjeta de Cumpleaños - Mau",
+      "description": "Invitación interactiva para Mau (cumpleanos)",
+      "unitPrice": 10,
+      "currencyId": "ARS",
+      "quantity": 1
+    },
+    "amount": 10,
+    "currency": "ARS",
+    "createdAt": "2026-09-04T12:51:20.024Z",
+    "updatedAt": "2026-09-04T12:51:20.846Z",
+    "preferenceId": "2210908-36f0a2b4-2acf-4a0e-b150-7f07593bf6f7",
+    "paymentId": "SIMULATED-PAY-1788526280846",
+    "downloadToken": "eyJvcmRlcklkIjoiNGE2ZGQ2NTctZmI3ZC00YmE3LWIwZDgtYzU1NDM5ZjkzMDEwIiwidGltZXN0YW1wIjoxNzg4NTI2MjgwODQ3LCJub25jZSI6IjFjNTJiMjgzMzZiMTdmZGMyYmRiZTIyOWEzNDU5ODRiIn0.IgT5VtWLmS98rSP85VNdLl1_aCVdIHhvmyjN65PJfjc",
+    "cardData": {
+      "eventType": "cumpleanos",
+      "name": "Mau",
+      "age": "33",
+      "photo": "",
+      "address": "Suiza 886",
+      "city": "Junín",
+      "province": "Buenos Aires",
+      "country": "Argentina",
+      "date": "15 de Noviembre",
+      "time": "17:00 hs"
+    },
+    "metadata": {
+      "ip": "127.0.0.1",
+      "userAgent": "node"
+    },
+    "paymentMethod": "simulated_credit_card"
   }
 ]
