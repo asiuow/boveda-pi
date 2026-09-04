@@ -154,11 +154,11 @@ function updateDeckCards(fraction = deckCurrentFraction) {
     const diff = idx - fraction;
     const absDiff = Math.abs(diff);
 
-    // Separación horizontal amplia para que las cartas se vean hacia los costados
-    const tx = diff * 58; 
+    // Separación horizontal proporcional para las tarjetas ampliadas
+    const tx = diff * 66; 
     
     // Curvatura del abanico: arco suave hacia la base
-    const ty = Math.pow(absDiff, 1.2) * 8.0;
+    const ty = Math.pow(absDiff, 1.2) * 8.2;
     
     // Profundidad 3D
     const tz = 110 - absDiff * 20;
