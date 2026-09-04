@@ -291,6 +291,16 @@ function initDeckStage() {
 
     const cards = document.querySelectorAll('.deck-card');
     cards.forEach(c => c.classList.add('no-transition'));
+
+    const finger = document.getElementById('fingerTutorial');
+    if (finger) {
+      finger.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+      finger.style.opacity = '0';
+      finger.style.transform = 'translate(-50%, -50%) scale(0.3)';
+      setTimeout(() => {
+        if (finger && finger.parentNode) finger.remove();
+      }, 220);
+    }
   }
 
   function onPointerMove(e) {
@@ -380,6 +390,14 @@ function initDeckStage() {
       e.preventDefault();
     }
   }, { passive: false });
+
+  // Auto-limpieza del dedo animado tutorial una vez finalizada la animación
+  const fingerEl = document.getElementById('fingerTutorial');
+  if (fingerEl) {
+    fingerEl.addEventListener('animationend', () => {
+      if (fingerEl && fingerEl.parentNode) fingerEl.remove();
+    });
+  }
 
   // Render inicial en tarjeta 0
   updateDeckCards(0);
