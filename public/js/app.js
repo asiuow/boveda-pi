@@ -390,9 +390,43 @@ function initDeckStage() {
     }
   }, { passive: false });
 
-  // Auto-limpieza del dedo animado tutorial una vez finalizada la animación
+  // Dedo tutorial: aparece 1 segundo después de cargar las imágenes del abanico
   const fingerEl = document.getElementById('fingerTutorial');
   if (fingerEl) {
+    const deckImages = Array.from(document.querySelectorAll('.deck-card img'));
+    let activated = false;
+
+    function activateFingerTutorial() {
+      if (activated) return;
+      activated = true;
+      setTimeout(() => {
+        if (fingerEl && fingerEl.parentNode) {
+          fingerEl.classList.add('is-active');
+        }
+      }, 1000); // 1 segundo después de cargar las imágenes
+    }
+
+    if (deckImages.length === 0) {
+      activateFingerTutorial();
+    } else {
+      let pending = deckImages.length;
+      deckImages.forEach(img => {
+        if (img.complete && img.naturalHeight !== 0) {
+          pending--;
+          if (pending <= 0) activateFingerTutorial();
+        } else {
+          const onDone = () => {
+            pending--;
+            if (pending <= 0) activateFingerTutorial();
+          };
+          img.addEventListener('load', onDone, { once: true });
+          img.addEventListener('error', onDone, { once: true });
+        }
+      });
+      // Timeout de respaldo por seguridad si alguna imagen tarda
+      setTimeout(activateFingerTutorial, 2000);
+    }
+
     fingerEl.addEventListener('animationend', () => {
       if (fingerEl && fingerEl.parentNode) fingerEl.remove();
     });
