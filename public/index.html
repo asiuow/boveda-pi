@@ -108,39 +108,36 @@
       </div>
     </section>
 
-    <!-- PANEL 1: Nombre, Edad y Foto -->
-    <section id="panel1" class="panel">
-      <h2 id="step1Title">¿Cómo es tu nombre? 🎂</h2>
-      <p class="panel-desc" id="step1Desc">Ingresa los datos del homenajeado o anfitrión</p>
-
-      <div class="form-group">
-        <label for="inputName" id="labelName">Nombre completo o apodo</label>
-        <input type="text" id="inputName" maxlength="20" placeholder="Ej: Mateo (máx. 20 letras)" oninput="updateCharCount()">
-        <div id="charCount" class="char-counter">0 / 20</div>
-      </div>
-
-      <div class="form-group" id="groupAge">
-        <label for="inputAge" id="labelAge">¿Cuántos años cumples?</label>
-        <input type="number" id="inputAge" min="1" max="120" placeholder="Ej: 5">
-      </div>
-
-      <!-- Cargador de Foto -->
-      <div class="form-group">
-        <label>Foto destacada</label>
-        <div class="photo-uploader" onclick="document.getElementById('filePhoto').click()">
-          <input type="file" id="filePhoto" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
-          <div class="photo-preview-box" id="previewPhotoBox">
-            <span id="photoIcon" style="font-size: 32px;">📷</span>
-            <img id="imgPreview" src="" style="display: none;">
-          </div>
-          <div class="uploader-text" id="uploaderText">Subir una linda foto</div>
-          <div class="uploader-sub">Toca aquí para seleccionar de tu galería</div>
+    <!-- PANEL 1: EDITOR INTERACTIVO FULL SCREEN (Parte 2: Tarjeta Full Screen, Vector Text Onda en Agua, Nodos de Recorte) -->
+    <section id="panel1" class="panel panel-card-editor">
+      <!-- Sistema Superior: Solo el Nombre -->
+      <div class="editor-header-bar">
+        <div class="editor-name-input-box">
+          <input type="text" id="inputName" maxlength="20" placeholder="Escribe el nombre aquí..." oninput="onEditorNameInput(this.value)" autocomplete="off">
+          <span id="charCount" class="editor-name-counter">0/20</span>
         </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="goToStep(0)">← Cambiar modelo</button>
-        <button class="btn btn-primary" onclick="goToStep(2)">Siguiente paso →</button>
+      <!-- Lienzo Principal Full Screen -->
+      <div class="editor-stage-wrap" id="editorStageWrap">
+        <canvas id="cardEditorCanvas" width="720" height="960"></canvas>
+
+        <!-- Barra flotante de acciones sobre la foto -->
+        <div class="editor-floating-controls">
+          <input type="file" id="filePhoto" accept="image/*" style="display: none;" onchange="handleEditorPhotoUpload(event)">
+          <button type="button" class="btn-floating-action" onclick="document.getElementById('filePhoto').click()">
+            <span id="btnPhotoLabel">📷 Subir foto</span>
+          </button>
+          <button type="button" id="btnToggleCropNodes" class="btn-floating-action btn-secondary-action" style="display: none;" onclick="toggleCropNodesVisibility()">
+            ✂️ Ajustar recorte
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Navegación Inferior: Ambos botones Volver y Siguiente -->
+      <div class="editor-bottom-bar">
+        <button class="btn btn-secondary btn-nav" onclick="goToStep(0)">Volver</button>
+        <button class="btn btn-primary btn-nav" onclick="goToStep(2)">Siguiente</button>
       </div>
     </section>
 

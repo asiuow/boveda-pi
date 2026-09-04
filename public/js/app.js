@@ -479,75 +479,486 @@ function initDeckStage() {
   updateDeckCards(0);
 }
 
-/**
- * Contador de caracteres del nombre (Máx 20 letras)
- */
-function updateCharCount() {
-  const input = document.getElementById('inputName');
-  const count = input.value.length;
-  document.getElementById('charCount').innerText = `${count} / 20`;
+// ========================================================
+// PARTE 2: MOTOR EDITOR FULL SCREEN (VECTOR TEXT + MALLA 8 NODOS + ONDA EN AGUA)
+// ========================================================
+let editorCanvas = null;
+let editorCtx = null;
+let editorAnimId = null;
+let glyphsData = null;
+let editorCardTemplateImg = new Image();
+let editorPhotoImg = new Image();
+let editorPhotoLoaded = false;
+let showCropNodes = true;
+let animStartTime = performance.now();
+
+// Malla simétrica de 8 nodos para recorte orgánico (CROP)
+let meshCenter = { cx: 360, cy: 520 };
+let defaultMeshCenter = { cx: 360, cy: 520 };
+let meshAngle = 0;
+let isDraggingNode = null;
+let dragStartPointer = { x: 0, y: 0 };
+let dragStartCenter = { cx: 360, cy: 520 };
+
+let meshOffsets = {
+  dy_top: -160,
+  dx_temple: 110,
+  dy_temple: -110,
+  dx_ear: 135,
+  dy_ear: 0,
+  dx_jaw: 105,
+  dy_jaw: 120,
+  dy_chin: 170
+};
+let defaultMeshOffsets = { ...meshOffsets };
+
+// Carga asíncrona de glifos vectoriales de Tarjetas PI
+fetch('/data/glyphs.json')
+  .then(res => res.json())
+  .then(data => { glyphsData = data; })
+  .catch(err => console.warn('Aviso: cargando glifos:', err));
+
+function getLocalNodes() {
+  const { dy_top, dx_temple, dy_temple, dx_ear, dy_ear, dx_jaw, dy_jaw, dy_chin } = meshOffsets;
+  return [
+    { id: "N",  lx: 0,          ly: dy_top },
+    { id: "NE", lx: dx_temple,  ly: dy_temple },
+    { id: "E",  lx: dx_ear,     ly: dy_ear },
+    { id: "SE", lx: dx_jaw,     ly: dy_jaw },
+    { id: "S",  lx: 0,          ly: dy_chin },
+    { id: "SW", lx: -dx_jaw,    ly: dy_jaw },
+    { id: "W",  lx: -dx_ear,    ly: dy_ear },
+    { id: "NW", lx: -dx_temple, ly: dy_temple }
+  ];
 }
 
-/**
- * Cargar, comprimir y optimizar foto para móviles (Canvas max 800x800)
- */
-function handlePhotoUpload(event) {
+function getRotatedNodes() {
+  const { cx, cy } = meshCenter;
+  const cos = Math.cos(meshAngle);
+  const sin = Math.sin(meshAngle);
+  const locals = getLocalNodes();
+
+  return locals.map(p => ({
+    id: p.id,
+    x: cx + p.lx * cos - p.ly * sin,
+    y: cy + p.lx * sin + p.ly * cos
+  }));
+}
+
+function drawSmoothSpline(targetCtx, nodes) {
+  const n = nodes.length;
+  if (n < 3) return;
+
+  targetCtx.beginPath();
+  const midX = (nodes[0].x + nodes[n - 1].x) / 2;
+  const midY = (nodes[0].y + nodes[n - 1].y) / 2;
+  targetCtx.moveTo(midX, midY);
+
+  for (let i = 0; i < n; i++) {
+    const p1 = nodes[i];
+    const p2 = nodes[(i + 1) % n];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    targetCtx.quadraticCurveTo(p1.x, p1.y, mx, my);
+  }
+  targetCtx.closePath();
+}
+
+// Renderizado de Vector Text de Tarjetas PI con Efecto Onda en Agua
+function renderVectorText(targetCtx, text, centerX, centerY, fontScale, currentTime) {
+  if (!text) return;
+  const upper = text.toUpperCase();
+
+  // Si glyphs.json aún no cargó o falta una letra, fallback a tipografía suave
+  if (!glyphsData) {
+    targetCtx.save();
+    targetCtx.font = `800 ${Math.round(62 * fontScale * 4)}px 'Fredoka', sans-serif`;
+    targetCtx.textAlign = 'center';
+    targetCtx.fillStyle = '#ffffff';
+    targetCtx.strokeStyle = '#e12b5b';
+    targetCtx.lineWidth = 6;
+    targetCtx.strokeText(upper, centerX, centerY + Math.sin(currentTime * 2) * 5);
+    targetCtx.fillText(upper, centerX, centerY + Math.sin(currentTime * 2) * 5);
+    targetCtx.restore();
+    return;
+  }
+
+  const chars = upper.split('');
+  const GLYPH_BASE_W = 494.26;
+  const GLYPH_BASE_H = 446.77;
+  const s = fontScale;
+  const glyphW = GLYPH_BASE_W * s;
+  const letterAdvance = glyphW * 0.76; // Solapamiento armónico de Tarjetas PI
+  const spaceAdvance = glyphW * 0.45;
+
+  let totalWidth = 0;
+  for (let i = 0; i < chars.length; i++) {
+    totalWidth += chars[i] === ' ' ? spaceAdvance : letterAdvance;
+  }
+
+  let curX = centerX - totalWidth / 2;
+
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+    if (ch === ' ') {
+      curX += spaceAdvance;
+      continue;
+    }
+
+    const paths = glyphsData[ch];
+    if (!paths || paths.length === 0) {
+      curX += letterAdvance;
+      continue;
+    }
+
+    // Efecto Onda en Agua: movimiento armónico rotatorio y vertical independiente
+    const waveRot = Math.sin(currentTime * 1.8 + i * 0.52) * 0.052;
+    const waveY = Math.sin(currentTime * 2.2 + i * 0.62) * 6.0;
+    const waveX = Math.cos(currentTime * 1.3 + i * 0.42) * 3.0;
+
+    const charCenterX = curX + glyphW / 2 + waveX;
+    const charCenterY = centerY + waveY;
+
+    targetCtx.save();
+    targetCtx.translate(charCenterX, charCenterY);
+    targetCtx.rotate(waveRot);
+    targetCtx.scale(s, s);
+    targetCtx.translate(-GLYPH_BASE_W / 2, -GLYPH_BASE_H / 2);
+
+    // Sombra 3D
+    targetCtx.shadowColor = "rgba(0, 0, 0, 0.45)";
+    targetCtx.shadowBlur = 10;
+    targetCtx.shadowOffsetX = 3;
+    targetCtx.shadowOffsetY = 6;
+
+    const combinedPath = new Path2D(paths.join(" "));
+    
+    // Relleno blanco con contorno coral
+    targetCtx.fillStyle = "#ffffff";
+    targetCtx.fill(combinedPath);
+
+    targetCtx.lineWidth = 7;
+    targetCtx.strokeStyle = "#e12b5b";
+    targetCtx.stroke(combinedPath);
+
+    targetCtx.restore();
+    curX += letterAdvance;
+  }
+}
+
+function onEditorNameInput(val) {
+  cardState.name = val;
+  const counter = document.getElementById('charCount');
+  if (counter) counter.innerText = `${val.length}/20`;
+}
+
+function handleEditorPhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const maxDim = 800;
-      let width = img.width;
-      let height = img.height;
-
-      if (width > height && width > maxDim) {
-        height = Math.round((height * maxDim) / width);
-        width = maxDim;
-      } else if (height > maxDim) {
-        width = Math.round((width * maxDim) / height);
-        height = maxDim;
+    editorPhotoImg = new Image();
+    editorPhotoImg.onload = function() {
+      editorPhotoLoaded = true;
+      showCropNodes = true;
+      const btnCrop = document.getElementById('btnToggleCropNodes');
+      if (btnCrop) {
+        btnCrop.style.display = 'inline-flex';
+        btnCrop.innerText = '✂️ Ajustar recorte';
       }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-      cardState.photo = compressedDataUrl;
-
-      document.getElementById('imgPreview').src = cardState.photo;
-      document.getElementById('imgPreview').style.display = 'block';
-      document.getElementById('photoIcon').style.display = 'none';
-      document.getElementById('uploaderText').innerText = 'Foto lista ✅';
-      document.getElementById('sumPhotoStatus').innerText = 'Cargada y Optimizada ✅';
+      const btnLabel = document.getElementById('btnPhotoLabel');
+      if (btnLabel) btnLabel.innerText = '🔄 Cambiar foto';
+      meshCenter = { cx: 360, cy: 520 };
     };
-    img.src = e.target.result;
+    editorPhotoImg.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function toggleCropNodesVisibility() {
+  showCropNodes = !showCropNodes;
+  const btnCrop = document.getElementById('btnToggleCropNodes');
+  if (btnCrop) {
+    btnCrop.innerText = showCropNodes ? '👁️ Ocultar nodos' : '✂️ Ajustar recorte';
+  }
+}
+
+function exportCroppedPhotoData() {
+  if (!editorPhotoLoaded || !editorPhotoImg) return;
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = 400;
+  offCanvas.height = 400;
+  const offCtx = offCanvas.getContext('2d');
+
+  const nodes = getRotatedNodes();
+  offCtx.save();
+  offCtx.translate(200 - meshCenter.cx, 200 - meshCenter.cy);
+  drawSmoothSpline(offCtx, nodes);
+  offCtx.clip();
+
+  const pw = editorPhotoImg.naturalWidth || editorPhotoImg.width;
+  const ph = editorPhotoImg.naturalHeight || editorPhotoImg.height;
+  const maxDim = Math.max(meshOffsets.dx_ear * 2.8, (meshOffsets.dy_chin - meshOffsets.dy_top) * 1.3);
+  const aspect = pw / ph;
+  let dw = maxDim;
+  let dh = maxDim;
+  if (aspect > 1) {
+    dw = maxDim * aspect;
+  } else {
+    dh = maxDim / aspect;
+  }
+  offCtx.drawImage(editorPhotoImg, meshCenter.cx - dw / 2, meshCenter.cy - dh / 2, dw, dh);
+  offCtx.restore();
+
+  cardState.photo = offCanvas.toDataURL('image/png');
+  const sumPhoto = document.getElementById('sumPhotoStatus');
+  if (sumPhoto) sumPhoto.innerText = 'Foto silueteada con nodos ✅';
+}
+
+function initEditorCanvasPointerEvents() {
+  if (!editorCanvas || editorCanvas.dataset.hasPointerEvents === 'true') return;
+  editorCanvas.dataset.hasPointerEvents = 'true';
+
+  function getCanvasPos(e) {
+    const rect = editorCanvas.getBoundingClientRect();
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY) || 0;
+    const scaleX = editorCanvas.width / rect.width;
+    const scaleY = editorCanvas.height / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  editorCanvas.addEventListener('pointerdown', (e) => {
+    if (!editorPhotoLoaded || !showCropNodes) return;
+    const pos = getCanvasPos(e);
+
+    // Verificar clic sobre el punto central
+    const distCenter = Math.hypot(pos.x - meshCenter.cx, pos.y - meshCenter.cy);
+    if (distCenter <= 30) {
+      isDraggingNode = 'center';
+      dragStartPointer = { ...pos };
+      dragStartCenter = { ...meshCenter };
+      editorCanvas.setPointerCapture(e.pointerId);
+      return;
+    }
+
+    // Verificar clic sobre alguno de los 8 nodos
+    const nodes = getRotatedNodes();
+    for (let node of nodes) {
+      const d = Math.hypot(pos.x - node.x, pos.y - node.y);
+      if (d <= 26) {
+        isDraggingNode = node.id;
+        dragStartPointer = { ...pos };
+        editorCanvas.setPointerCapture(e.pointerId);
+        return;
+      }
+    }
+  });
+
+  editorCanvas.addEventListener('pointermove', (e) => {
+    if (!isDraggingNode) return;
+    const pos = getCanvasPos(e);
+
+    if (isDraggingNode === 'center') {
+      meshCenter.cx = Math.max(100, Math.min(620, dragStartCenter.cx + (pos.x - dragStartPointer.x)));
+      meshCenter.cy = Math.max(150, Math.min(850, dragStartCenter.cy + (pos.y - dragStartPointer.y)));
+      return;
+    }
+
+    const dx = pos.x - meshCenter.cx;
+    const dy = pos.y - meshCenter.cy;
+
+    if (isDraggingNode === 'N') {
+      meshOffsets.dy_top = Math.min(-50, dy);
+    } else if (isDraggingNode === 'S') {
+      meshOffsets.dy_chin = Math.max(50, dy);
+    } else if (isDraggingNode === 'E' || isDraggingNode === 'W') {
+      meshOffsets.dx_ear = Math.max(45, Math.abs(dx));
+    } else if (isDraggingNode === 'NE' || isDraggingNode === 'NW') {
+      meshOffsets.dx_temple = Math.max(35, Math.abs(dx));
+      meshOffsets.dy_temple = Math.min(-35, dy);
+    } else if (isDraggingNode === 'SE' || isDraggingNode === 'SW') {
+      meshOffsets.dx_jaw = Math.max(35, Math.abs(dx));
+      meshOffsets.dy_jaw = Math.max(35, dy);
+    }
+  });
+
+  function onPointerEnd(e) {
+    if (isDraggingNode) {
+      try { editorCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      isDraggingNode = null;
+    }
+  }
+
+  editorCanvas.addEventListener('pointerup', onPointerEnd);
+  editorCanvas.addEventListener('pointercancel', onPointerEnd);
+}
+
+function renderEditorCanvas() {
+  if (!editorCtx) return;
+  const w = editorCanvas.width;
+  const h = editorCanvas.height;
+  editorCtx.clearRect(0, 0, w, h);
+
+  // 1. Dibujar Tarjeta seleccionada de Fondo Full Screen
+  if (editorCardTemplateImg && editorCardTemplateImg.complete && editorCardTemplateImg.naturalWidth > 0) {
+    editorCtx.drawImage(editorCardTemplateImg, 0, 0, w, h);
+  } else {
+    editorCtx.fillStyle = "#f4e8db";
+    editorCtx.fillRect(0, 0, w, h);
+  }
+
+  // 2. Dibujar Foto con Recorte de 8 Nodos (Spline suave)
+  const nodes = getRotatedNodes();
+  if (editorPhotoLoaded && editorPhotoImg && editorPhotoImg.complete && editorPhotoImg.naturalWidth > 0) {
+    editorCtx.save();
+
+    drawSmoothSpline(editorCtx, nodes);
+    editorCtx.clip();
+
+    const pw = editorPhotoImg.naturalWidth;
+    const ph = editorPhotoImg.naturalHeight;
+    const maxDim = Math.max(meshOffsets.dx_ear * 2.8, (meshOffsets.dy_chin - meshOffsets.dy_top) * 1.3);
+    const aspect = pw / ph;
+    let dw = maxDim;
+    let dh = maxDim;
+    if (aspect > 1) {
+      dw = maxDim * aspect;
+    } else {
+      dh = maxDim / aspect;
+    }
+    editorCtx.drawImage(editorPhotoImg, meshCenter.cx - dw / 2, meshCenter.cy - dh / 2, dw, dh);
+    editorCtx.restore();
+
+    // Contorno estético del recorte
+    editorCtx.save();
+    editorCtx.lineWidth = 3.5;
+    editorCtx.strokeStyle = "rgba(225, 43, 91, 0.85)";
+    editorCtx.shadowColor = "rgba(0, 0, 0, 0.35)";
+    editorCtx.shadowBlur = 8;
+    drawSmoothSpline(editorCtx, nodes);
+    editorCtx.stroke();
+    editorCtx.restore();
+  }
+
+  // 3. Dibujar Malla de Nodos interactiva
+  if (editorPhotoLoaded && showCropNodes) {
+    editorCtx.save();
+    editorCtx.lineWidth = 1.8;
+    editorCtx.setLineDash([5, 4]);
+    editorCtx.strokeStyle = "rgba(56, 189, 248, 0.9)";
+    drawSmoothSpline(editorCtx, nodes);
+    editorCtx.stroke();
+    editorCtx.restore();
+
+    // Centro (manipulador de traslación)
+    editorCtx.save();
+    editorCtx.beginPath();
+    editorCtx.arc(meshCenter.cx, meshCenter.cy, 12, 0, Math.PI * 2);
+    editorCtx.fillStyle = "#38bdf8";
+    editorCtx.fill();
+    editorCtx.lineWidth = 3;
+    editorCtx.strokeStyle = "#ffffff";
+    editorCtx.shadowColor = "rgba(0,0,0,0.5)";
+    editorCtx.shadowBlur = 6;
+    editorCtx.stroke();
+    editorCtx.restore();
+
+    // Nodos de control perimetrales
+    nodes.forEach(pt => {
+      editorCtx.save();
+      editorCtx.beginPath();
+      editorCtx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
+      editorCtx.fillStyle = "#e12b5b";
+      editorCtx.fill();
+      editorCtx.lineWidth = 2.5;
+      editorCtx.strokeStyle = "#ffffff";
+      editorCtx.shadowColor = "rgba(0,0,0,0.5)";
+      editorCtx.shadowBlur = 6;
+      editorCtx.stroke();
+      editorCtx.restore();
+    });
+  }
+
+  // 4. Dibujar Vector Text con Efecto Onda en Agua
+  const nameToRender = cardState.name ? cardState.name : 'TU NOMBRE';
+  const currentTime = (performance.now() - animStartTime) / 1000;
+  const fontScale = Math.min(0.25, 1.8 / Math.max(6, nameToRender.length));
+  renderVectorText(editorCtx, nameToRender, 360, 200, fontScale, currentTime);
+}
+
+function editorAnimationStep() {
+  if (currentStep === 1) {
+    renderEditorCanvas();
+    editorAnimId = requestAnimationFrame(editorAnimationStep);
+  }
+}
+
+function startEditorAnimationLoop() {
+  if (editorAnimId) cancelAnimationFrame(editorAnimId);
+  animStartTime = performance.now();
+  editorAnimId = requestAnimationFrame(editorAnimationStep);
+}
+
+function stopCardEditorLoop() {
+  if (editorAnimId) {
+    cancelAnimationFrame(editorAnimId);
+    editorAnimId = null;
+  }
+}
+
+function initCardEditor() {
+  editorCanvas = document.getElementById('cardEditorCanvas');
+  if (!editorCanvas) return;
+  editorCtx = editorCanvas.getContext('2d');
+
+  const modelNum = (deckActiveIndex || 0) + 1;
+  editorCardTemplateImg = new Image();
+  editorCardTemplateImg.onload = () => renderEditorCanvas();
+  editorCardTemplateImg.src = `/img/cards/card-${modelNum}.png`;
+
+  const input = document.getElementById('inputName');
+  if (input) {
+    input.value = cardState.name || '';
+    onEditorNameInput(input.value);
+  }
+
+  initEditorCanvasPointerEvents();
+  startEditorAnimationLoop();
 }
 
 /**
  * Navegación entre pasos
  */
 function goToStep(step) {
-  // Validaciones paso 1
+  // Validaciones y exportaciones al avanzar de la Parte 2 (paso 1) a paso 2
   if (step === 2 && currentStep === 1) {
-    const name = document.getElementById('inputName').value.trim();
+    const name = (cardState.name || document.getElementById('inputName')?.value || '').trim();
     if (!name) {
       showFunModal({
         emoji: '📝✨',
         title: '¡Falta el nombre!',
-        text: 'Por favor, escribe el nombre del homenajeado o anfitrión para que todos sepan a quién celebramos.'
+        text: 'Por favor, escribe el nombre del homenajeado para maquetar la tarjeta.'
       });
       return;
     }
     cardState.name = name.slice(0, 20);
-    cardState.age = document.getElementById('inputAge').value.trim();
+
+    // Exportar la foto recortada por la malla de nodos
+    if (editorPhotoLoaded && editorPhotoImg) {
+      exportCroppedPhotoData();
+    }
+  }
+
+  // Activar o desactivar el loop de animación del editor según el paso activo
+  if (step === 1) {
+    initCardEditor();
+  } else {
+    stopCardEditorLoop();
   }
 
   // Validaciones paso 2 (Ubicación Geográfica Precisa)
