@@ -182,16 +182,19 @@ h2 {
 }
 
 /* ========================================================
-   MARCO / MÁSCARA DEL ABANICO (FONDO TRANSPARENTE / CREMITA)
+   MARCO / MÁSCARA DEL ABANICO (MÁSCARA SUAVE CON GRADIENTE ABAJO)
    ======================================================== */
 .deck-stage-frame {
   position: relative;
-  background: transparent; /* Fondo transparente para que solo se vea el fondo cremita */
-  border-radius: 20px;
+  background: transparent;
+  border-radius: 0; /* Se elimina la esquina redondeada dura */
   margin: 6px 0 10px;
-  overflow: hidden; /* MÁSCARA: no sale de los bordes del área cremita */
+  overflow: hidden; /* Mantiene los costados recortados limpios */
   border: none;
   box-shadow: none;
+  /* Máscara suave con gradiente solo en la parte inferior */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%);
 }
 
 .deck-stage {
@@ -203,7 +206,7 @@ h2 {
   align-items: center;
   justify-content: center;
   perspective: 1100px;
-  overflow: visible; /* El abanico se abre libremente y el frame exterior lo enmascara */
+  overflow: visible;
   touch-action: pan-y;
   user-select: none;
   cursor: grab;
